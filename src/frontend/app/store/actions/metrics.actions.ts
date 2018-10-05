@@ -45,16 +45,15 @@ export class MetricsAction implements IRequestAction {
     public query: MetricQueryConfig,
     public url: string,
     public queryType: MetricQueryType = MetricQueryType.QUERY) {
-    this.metricId = MetricsAction.buildMetricKey(guid, query, queryType);
   }
   entityKey = metricSchemaKey;
   type = METRICS_START;
-  metricId: string;
-  directApi = false;
   static getBaseMetricsURL() {
     return `/pp/${proxyAPIVersion}/metrics`;
   }
-
+  get metricId(): string {
+    return MetricsAction.buildMetricKey(this.guid, this.query, this.queryType);
+  }
   // Builds the key that is used to store the metric in the app state.
   static buildMetricKey(guid: string, query: MetricQueryConfig, queryType: MetricQueryType) {
 

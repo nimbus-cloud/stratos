@@ -32,11 +32,7 @@ export class MetricsRangeSelectorService {
   ];
 
   private newMetricsAction(action: MetricsAction, newQuery: MetricQueryConfig, queryType: MetricQueryType): MetricsAction {
-    return {
-      ...action,
-      query: newQuery,
-      queryType
-    };
+    return new MetricsAction(action.guid, action.endpointGuid, newQuery, queryType);
   }
 
   public getNewDateRangeAction(action: MetricsAction, start: moment.Moment, end: moment.Moment) {
