@@ -12,14 +12,15 @@ export interface IMetricsResponse<T = any> {
   status: string;
   data: IMetrics<T>;
 }
+
 export interface IMetricsData<T = any> {
   resultType: string;
   result: [T];
 }
 export interface IMetrics<T = any> {
   query: MetricQueryConfig;
-  queryType: MetricQueryType;
-  data: IMetricsData;
+  windowValue: string;
+  data: IMetricsData<T>;
 }
 
 interface IVectorResult<T> {
@@ -47,3 +48,5 @@ export interface ChartSeries<T = any> {
     value: T;
   }[];
 }
+
+export type MetricsFilterSeries = (chartSeries: ChartSeries[]) => ChartSeries[];

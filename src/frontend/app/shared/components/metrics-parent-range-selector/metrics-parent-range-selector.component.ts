@@ -1,11 +1,12 @@
-import { Component, OnInit, QueryList, ViewChildren, AfterViewInit, AfterContentInit, ContentChildren, OnDestroy } from '@angular/core';
+import { AfterContentInit, Component, ContentChildren, OnDestroy, QueryList } from '@angular/core';
 import { Subscription } from 'rxjs';
+
+import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
+import { IMetrics } from '../../../store/types/base-metric.types';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
-import { MetricsChartComponent } from '../metrics-chart/metrics-chart.component';
 import { MetricQueryType } from '../../services/metrics-range-selector.types';
-import { metricSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
-import { IMetrics } from '../../../store/types/base-metric.types';
+import { MetricsChartComponent } from '../metrics-chart/metrics-chart.component';
 
 @Component({
   selector: 'app-metrics-parent-range-selector',
@@ -34,7 +35,7 @@ export class MetricsParentRangeSelectorComponent implements AfterContentInit, On
     }
     const action = this.metricsCharts.first.metricsConfig.metricsAction;
     const metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
-      action.metricId,
+      action.guid,
       metricSchemaKey,
       entityFactory(metricSchemaKey)
     );
@@ -45,11 +46,12 @@ export class MetricsParentRangeSelectorComponent implements AfterContentInit, On
           const oldAction = chart.metricsConfig.metricsAction;
           chart.metricsAction = {
             ...oldAction,
+            queryType: newAction.queryType,
             query: {
               ...oldAction.query,
               params: newAction.query.params
             },
-            queryType: newAction.queryType
+            windowValue: newAction.windowValue
           };
         });
       }
