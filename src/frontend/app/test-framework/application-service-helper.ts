@@ -17,7 +17,8 @@ import { AppState } from '../store/app-state';
 import { RequestInfoState } from '../store/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../store/types/api.types';
 import { AppStat } from '../store/types/app-metadata.types';
-
+import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
+import { AppAutoscalerPolicy, AppAutoscalerHealth } from '../store/types/app-autoscaler.types';
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {
@@ -56,6 +57,8 @@ export class ApplicationServiceMock {
   appSummary$: Observable<EntityInfo<APIResource<IAppSummary>>> = observableOf({
     entityRequestInfo: { fetching: false }
   } as EntityInfo<APIResource<IAppSummary>>);
+  appAutoscalerPolicy$: Observable<EntityInfo<AppAutoscalerPolicy>> = observableOf(({ entityRequestInfo: { fetching: false } } as EntityInfo<AppAutoscalerPolicy>));
+  appAutoscalerHealth$: Observable<EntityInfo<AppAutoscalerHealth>> = observableOf(({ entityRequestInfo: { fetching: false } } as EntityInfo<AppAutoscalerHealth>));
   appStats$: Observable<APIResource<AppStat>[]> = observableOf(new Array<APIResource<AppStat>>());
   applicationStratProject$: Observable<EnvVarStratosProject> =
     observableOf({ deploySource: { type: '', timestamp: 0, commit: '' }, deployOverrides: null });
