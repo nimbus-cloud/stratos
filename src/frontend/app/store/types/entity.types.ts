@@ -38,6 +38,9 @@ import {
   userFavoritesSchemaKey,
   appAutoscalerHealthSchemaKey,
   appAutoscalerPolicySchemaKey,
+  appAutoscalerScalingHistorySchemaKey,
+  appAutoscalerAppMetricHistorySchemaKey,
+  appAutoscalerInsMetricHistorySchemaKey,
 } from '../helpers/entity-factory';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
@@ -132,4 +135,7 @@ export const defaultCfEntitiesState = {
   [userFavoritesSchemaKey]: {},
   [appAutoscalerHealthSchemaKey]: {},
   [appAutoscalerPolicySchemaKey]: {},
+  [appAutoscalerScalingHistorySchemaKey]: {},
+  [appAutoscalerAppMetricHistorySchemaKey]: {},
+  [appAutoscalerInsMetricHistorySchemaKey]: {},
 };
