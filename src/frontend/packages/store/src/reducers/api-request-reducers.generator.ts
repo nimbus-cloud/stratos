@@ -26,6 +26,8 @@ import {
   spaceSchemaKey,
   userProfileSchemaKey,
   userFavoritesSchemaKey,
+  appAutoscalerPolicySchemaKey,
+  appAutoscalerHealthSchemaKey,
 } from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
 import { RequestTypes } from './../actions/request.actions';
@@ -113,7 +115,9 @@ const entities = [
   userProfileSchemaKey,
   servicePlanVisibilitySchemaKey,
   serviceBrokerSchemaKey,
-  userFavoritesSchemaKey
+  userFavoritesSchemaKey,
+  appAutoscalerPolicySchemaKey,
+  appAutoscalerHealthSchemaKey,
 ];
 
 export function registerAPIRequestEntity(schemaKey: string) {
