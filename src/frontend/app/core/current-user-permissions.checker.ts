@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { distinctUntilChanged, filter, map, switchMap, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
 import {
@@ -69,12 +69,10 @@ export class CurrentUserPermissionsChecker {
       map(state => {
         const permissionString = permission as PermissionStrings;
         if (allSpacesWithinOrg) {
-          const orgOrSpaceState = state[PermissionTypes.ORGANIZATION][orgOrSpaceGuid];
           const spaceState = state[PermissionTypes.SPACE];
-          return this.checkAllSpacesInOrg(orgOrSpaceState, spaceState, permissionString);
+          return this.checkAllSpacesInOrg(state[PermissionTypes.ORGANIZATION][orgOrSpaceGuid], spaceState, permissionString);
         }
-        const orgOrSpaceState = state[type][orgOrSpaceGuid];
-        return this.selectPermission(orgOrSpaceState, permissionString);
+        return this.selectPermission(state[type][orgOrSpaceGuid], permissionString);
       }),
       distinctUntilChanged(),
     );

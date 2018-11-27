@@ -8,7 +8,11 @@ import { CurrentUserPermissionsService } from '../../../../../core/current-user-
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
-import { getFullEndpointApiUrl, getNameForEndpointType } from '../../../../../features/endpoints/endpoint-helpers';
+import {
+  getFullEndpointApiUrl,
+  getNameForEndpointType,
+  getEndpointUsername,
+} from '../../../../../features/endpoints/endpoint-helpers';
 import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../../../store/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../store/actions/system.actions';
@@ -28,7 +32,8 @@ import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
 
 import { map, pairwise } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
+import { TableCellEndpointIsAdminComponent } from './table-cell-endpoint-is-admin/table-cell-endpoint-is-admin.component';
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
@@ -68,6 +73,30 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
       type: 'sort',
       orderKey: 'type',
       field: 'cnsi_type'
+    },
+    cellFlex: '2'
+  },
+  {
+    columnId: 'username',
+    headerCell: () => 'Username',
+    cellDefinition: {
+      getValue: getEndpointUsername
+    },
+    sort: {
+      type: 'sort',
+      orderKey: 'username',
+      field: 'user.name'
+    },
+    cellFlex: '2'
+  },
+  {
+    columnId: 'user-type',
+    headerCell: () => 'Admin',
+    cellComponent: TableCellEndpointIsAdminComponent,
+    sort: {
+      type: 'sort',
+      orderKey: 'user-type',
+      field: 'user.admin'
     },
     cellFlex: '2'
   },
@@ -119,23 +148,32 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       this.confirmDialog.open(confirmation, () => {
         this.store.dispatch(new DisconnectEndpoint(item.guid, item.cnsi_type));
         this.handleUpdateAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
-          this.store.dispatch(new ShowSnackBar(`Disconnected ${item.name}`));
+          this.store.dispatch(new ShowSnackBar(`Disconnected endpoint '${item.name}'`));
           this.store.dispatch(new GetSystemInfo());
         });
       });
     },
     label: 'Disconnect',
     description: ``, // Description depends on console user permission
-    createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => row.connectionStatus === 'connected'))
+    createVisible: (row$: Observable<EndpointModel>) => combineLatest(
+      this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER),
+      row$
+    ).pipe(
+      map(([isAdmin, row]) => {
+        const isConnected = row.connectionStatus === 'connected';
+        return isConnected && (!row.system_shared_token || row.system_shared_token && isAdmin);
+      })
+    )
   };
 
   private listActionConnect: IListAction<EndpointModel> = {
     action: (item) => {
-      const dialogRef = this.dialog.open(ConnectEndpointDialogComponent, {
+      this.dialog.open(ConnectEndpointDialogComponent, {
         data: {
           name: item.name,
           guid: item.guid,
           type: item.cnsi_type,
+          ssoAllowed: item.sso_allowed
         },
         disableClose: true
       });

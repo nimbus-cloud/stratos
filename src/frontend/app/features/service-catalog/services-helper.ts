@@ -15,7 +15,7 @@ import { GetServiceInstances } from '../../store/actions/service-instances.actio
 import { GetServicePlansForService } from '../../store/actions/service.actions';
 import { AppState } from '../../store/app-state';
 import { entityFactory, serviceInstancesSchemaKey, servicePlanSchemaKey } from '../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations/entity-relations.types';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
@@ -40,8 +40,6 @@ export const getSvcAvailability = (servicePlan: APIResource<IServicePlan>,
   }
   return svcAvailability;
 };
-
-export const safeUnsubscribe = (s: Subscription) => { if (s) { s.unsubscribe(); } };
 
 export const getServiceJsonParams = (params: any): {} => {
   let prms = params;
@@ -90,23 +88,23 @@ export const getServicePlans = (
   cfGuid: string,
   store: Store<AppState>,
   paginationMonitorFactory: PaginationMonitorFactory
-): Observable<APIResource<IServicePlan>[]>  => {
+): Observable<APIResource<IServicePlan>[]> => {
   return service$.pipe(
     filter(p => !!p),
     switchMap(service => {
-    if (service.entity.service_plans && service.entity.service_plans.length > 0) {
-      return observableOf(service.entity.service_plans);
-    } else {
-      const guid = service.metadata.guid;
-      const paginationKey = createEntityRelationPaginationKey(servicePlanSchemaKey, guid);
-      const getServicePlansAction = new GetServicePlansForService(guid, cfGuid, paginationKey);
-      // Could be a space-scoped service, make a request to fetch the plan
-      return getPaginationObservables<APIResource<IServicePlan>>({
-        store: store,
-        action: getServicePlansAction,
-        paginationMonitor: paginationMonitorFactory.create(getServicePlansAction.paginationKey, entityFactory(servicePlanSchemaKey))
-      }, true)
-        .entities$.pipe(share(), first());
-    }
-  }));
+      if (service.entity.service_plans && service.entity.service_plans.length > 0) {
+        return observableOf(service.entity.service_plans);
+      } else {
+        const guid = service.metadata.guid;
+        const paginationKey = createEntityRelationPaginationKey(servicePlanSchemaKey, guid);
+        const getServicePlansAction = new GetServicePlansForService(guid, cfGuid, paginationKey);
+        // Could be a space-scoped service, make a request to fetch the plan
+        return getPaginationObservables<APIResource<IServicePlan>>({
+          store: store,
+          action: getServicePlansAction,
+          paginationMonitor: paginationMonitorFactory.create(getServicePlansAction.paginationKey, entityFactory(servicePlanSchemaKey))
+        }, true)
+          .entities$.pipe(share(), first());
+      }
+    }));
 };

@@ -14,7 +14,7 @@ import { ICfV2Info } from '../../../../core/cf-api.types';
 export class CardCfInfoComponent implements OnInit, OnDestroy {
   apiUrl: string;
   subs: Subscription[] = [];
-  constructor(private cfEndpointService: CloudFoundryEndpointService) { }
+  constructor(public cfEndpointService: CloudFoundryEndpointService) { }
 
   description$: Observable<string>;
 
@@ -37,10 +37,6 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
     return `${apiEndpoint.Scheme}://${apiEndpoint.Host}${path}`;
   }
 
-  isAdmin(user) {
-    return user && user.admin ? 'Yes' : 'No';
-  }
-
   ngOnDestroy(): void {
     this.subs.forEach(s => s.unsubscribe());
   }
@@ -49,7 +45,7 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
     let desc = '-';
     if (entity && entity.entity && entity.entity.entity) {
       const metadata = entity.entity.entity;
-      if (metadata.description.length === 0 ) {
+      if (metadata.description.length === 0) {
         // No descripion - custom overrides
         if (metadata.support === 'pcfdev@pivotal.io') {
           desc = 'PCF Dev';

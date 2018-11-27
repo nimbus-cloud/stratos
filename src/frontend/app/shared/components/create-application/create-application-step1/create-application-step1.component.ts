@@ -1,22 +1,18 @@
-
-import { of as observableOf,  Observable } from 'rxjs';
 import { AfterContentInit, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
+import { Observable, of as observableOf, asapScheduler } from 'rxjs';
+import { map, startWith, switchMap, withLatestFrom, observeOn } from 'rxjs/operators';
 
-import { map, switchMap, withLatestFrom } from 'rxjs/operators';
-
-import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
+import { ISpace } from '../../../../core/cf-api.types';
+import { PermissionStrings } from '../../../../core/current-user-permissions.config';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { SetCFDetails } from '../../../../store/actions/create-applications-page.actions';
 import { AppState } from '../../../../store/app-state';
-
-import { getSpacesFromOrgWithRole } from '../../../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
-import { PermissionStrings } from '../../../../core/current-user-permissions.config';
-import { ISpace } from '../../../../core/cf-api.types';
-
-import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-
-
+import {
+  getSpacesFromOrgWithRole,
+} from '../../../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
+import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 
 @Component({
   selector: 'app-create-application-step1',
@@ -25,7 +21,7 @@ import { StepOnNextFunction } from '../../../../shared/components/stepper/step/s
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
 
-  @Input('isMarketplaceMode')
+  @Input()
   isMarketplaceMode: boolean;
   constructor(
     private store: Store<AppState>,
@@ -34,17 +30,16 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   public spaces$: Observable<ISpace[]>;
   public hasSpaces$: Observable<boolean>;
-
-  cfValid$: Observable<boolean>;
+  public hasOrgs$: Observable<boolean>;
 
   @ViewChild('cfForm')
   cfForm: NgForm;
 
-  @Input('isRedeploy') isRedeploy = false;
+  @Input() isRedeploy = false;
 
   validate: Observable<boolean>;
 
-  @Input('stepperText')
+  @Input()
   stepperText = 'Select a Cloud Foundry instance, organization and space for the app.';
 
   onNext: StepOnNextFunction = () => {
@@ -58,6 +53,9 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   ngOnInit() {
     this.spaces$ = this.getSpacesFromPermissions();
+    this.hasOrgs$ = this.cfOrgSpaceService.org.list$.pipe(
+      map(o => o && o.length > 0)
+    );
     this.hasSpaces$ = this.spaces$.pipe(
       map(spaces => !!spaces.length)
     );
@@ -72,9 +70,9 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   ngAfterContentInit() {
     this.validate = this.cfForm.statusChanges.pipe(
-      map(() => {
-        return this.cfForm.valid || this.isRedeploy;
-      })
+      startWith(this.cfForm.valid || this.isRedeploy),
+      map(() => this.cfForm.valid || this.isRedeploy),
+      observeOn(asapScheduler)
     );
   }
 

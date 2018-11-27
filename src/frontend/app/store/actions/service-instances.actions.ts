@@ -4,73 +4,36 @@ import {
   applicationSchemaKey,
   entityFactory,
   organizationSchemaKey,
+  serviceBindingNoBindingsSchemaKey,
   serviceBindingSchemaKey,
   serviceInstancesSchemaKey,
   serviceInstancesWithSpaceSchemaKey,
   servicePlanSchemaKey,
   serviceSchemaKey,
   spaceSchemaKey,
-  serviceBindingNoBindingsSchemaKey,
 } from '../helpers/entity-factory';
-import {
-  createEntityRelationKey,
-  EntityInlineChildAction,
-  EntityInlineParentAction,
-} from '../helpers/entity-relations.types';
-import { PaginationAction } from '../types/pagination.types';
+import { createEntityRelationKey, EntityInlineParentAction } from '../helpers/entity-relations/entity-relations.types';
+import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
 
 export const DELETE_SERVICE_BINDING = '[Service Instances] Delete service binding';
 export const UPDATE_SERVICE_INSTANCE_SUCCESS = getActions('Service Instances', 'Update Service Instance')[1];
-
-export class GetServicesInstancesInSpace
-  extends CFStartAction implements PaginationAction, EntityInlineParentAction, EntityInlineChildAction {
-  constructor(
-    public endpointGuid: string,
-    public spaceGuid: string,
-    public paginationKey: string,
-    public includeRelations: string[] = [
-      createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
-      createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey)
-    ],
-    public populateMissing = true
-  ) {
-    super();
-    this.options = new RequestOptions();
-    this.options.url = `spaces/${spaceGuid}/service_instances`;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
-    this.parentGuid = spaceGuid;
-  }
-  actions = getActions('Service Instances', 'Get all in Space');
-  entity = [entityFactory(serviceInstancesSchemaKey)];
-  entityKey = serviceInstancesSchemaKey;
-  options: RequestOptions;
-  initialParams = {
-    page: 1,
-    'results-per-page': 100,
-    'order-direction': 'desc',
-    'order-direction-field': 'creation',
-  };
-  parentGuid: string;
-  parentEntitySchema = entityFactory(spaceSchemaKey);
-  flattenPagination = true;
-}
+export const getServiceInstanceRelations = [
+  createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
+  createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
+  createEntityRelationKey(serviceInstancesSchemaKey, spaceSchemaKey),
+  createEntityRelationKey(serviceInstancesSchemaKey, serviceSchemaKey),
+  createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
+  createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
+];
 
 export class GetServiceInstances
-  extends CFStartAction implements PaginationAction, EntityInlineParentAction {
+  extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
     public endpointGuid: string,
     public paginationKey: string,
-    public includeRelations: string[] = [
-      createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
-      createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
-      createEntityRelationKey(serviceInstancesSchemaKey, spaceSchemaKey),
-      createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
-      createEntityRelationKey(servicePlanSchemaKey, serviceSchemaKey),
-      createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
-    ],
+    public includeRelations: string[] = getServiceInstanceRelations,
     public populateMissing = true
   ) {
     super();
@@ -96,10 +59,7 @@ export class GetServiceInstance
   constructor(
     public guid: string,
     public endpointGuid: string,
-    public includeRelations: string[] = [
-      createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
-      createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey)
-    ],
+    public includeRelations: string[] = getServiceInstanceRelations,
     public populateMissing = true
   ) {
     super();
@@ -109,7 +69,7 @@ export class GetServiceInstance
     this.options.params = new URLSearchParams();
   }
   actions = getActions('Service Instances', 'Get particular instance');
-  entity = [entityFactory(serviceInstancesSchemaKey)];
+  entity = [entityFactory(serviceInstancesWithSpaceSchemaKey)];
   entityKey = serviceInstancesSchemaKey;
   options: RequestOptions;
 }
@@ -160,6 +120,7 @@ export class CreateServiceInstance extends CFStartAction implements ICFAction {
 }
 
 export class UpdateServiceInstance extends CreateServiceInstance {
+  static updateServiceInstance = 'Updating-Service-Instance';
   constructor(
     public endpointGuid: string,
     public guid: string,
@@ -172,13 +133,13 @@ export class UpdateServiceInstance extends CreateServiceInstance {
     super(endpointGuid, guid, name, servicePlanGuid, spaceGuid, params, tags);
     this.options.method = 'put';
     this.options.url = `${this.options.url}/${this.guid}`;
-
     this.actions = getActions('Service Instances', 'Update Service Instance');
   }
+  updatingKey = UpdateServiceInstance.updateServiceInstance;
 }
 
 export class ListServiceBindingsForInstance
-  extends CFStartAction implements PaginationAction, EntityInlineParentAction {
+  extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
     public endpointGuid: string,
     public serviceInstanceGuid: string,

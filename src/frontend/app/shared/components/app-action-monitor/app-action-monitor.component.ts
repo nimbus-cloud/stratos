@@ -1,17 +1,16 @@
 
-import {of as observableOf, never as observableNever,  Observable } from 'rxjs';
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { schema } from 'normalizr';
-import { AppMonitorComponentTypes, IApplicationMonitorComponentState } from '../app-action-monitor-icon/app-action-monitor-icon.component';
-import { rootUpdatingKey } from '../../../store/reducers/api-request-reducer/types';
-import { MatTableDataSource } from '@angular/material';
 import { DataSource } from '@angular/cdk/table';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { schema } from 'normalizr';
+import { never as observableNever, Observable, of as observableOf } from 'rxjs';
+import { rootUpdatingKey } from '../../../store/reducers/api-request-reducer/types';
+import { AppMonitorComponentTypes, IApplicationMonitorComponentState } from '../app-action-monitor-icon/app-action-monitor-icon.component';
 import { ITableListDataSource } from '../list/data-sources-controllers/list-data-source-types';
-import { ITableColumn } from '../list/list-table/table.types';
 import {
-  TableCellRequestMonitorIconComponent,
-  ITableCellRequestMonitorIconConfig
+  ITableCellRequestMonitorIconConfig,
+  TableCellRequestMonitorIconComponent
 } from '../list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
+import { ITableColumn } from '../list/list-table/table.types';
 
 @Component({
   selector: 'app-action-monitor',
@@ -20,37 +19,37 @@ import {
 })
 export class AppActionMonitorComponent<T> implements OnInit {
 
-  @Input('data$')
+  @Input()
   private data$: Observable<Array<T>> = observableNever();
 
-  @Input('entityKey')
+  @Input()
   public entityKey: string;
 
-  @Input('schema')
+  @Input()
   public schema: schema.Entity;
 
-  @Input('monitorState')
+  @Input()
   public monitorState: AppMonitorComponentTypes = AppMonitorComponentTypes.FETCHING;
 
-  @Input('updateKey')
+  @Input()
   public updateKey = rootUpdatingKey;
 
-  @Input('getId')
+  @Input()
   public getId: (element) => string;
 
-  @Input('trackBy')
+  @Input()
   public trackBy = ((index: number, item: T) => index.toString());
 
-  @Input('getCellConfig')
+  @Input()
   public getCellConfig: (element) => ITableCellRequestMonitorIconConfig;
 
-  @Input('columns')
+  @Input()
   public columns: ITableColumn<T>[] = [];
 
-  @Output('currentState')
+  @Output()
   public currentState: EventEmitter<IApplicationMonitorComponentState>;
 
-  private dataSource: DataSource<T>;
+  public dataSource: DataSource<T>;
 
   public allColumns: ITableColumn<T>[] = [];
 

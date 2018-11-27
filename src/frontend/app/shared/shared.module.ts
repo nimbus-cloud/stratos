@@ -131,6 +131,15 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { UserPermissionDirective } from './user-permission.directive';
 import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/cf-endpoints-missing.component';
+import { CapitalizeFirstPipe } from './pipes/capitalizeFirstLetter.pipe';
+import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
+import { ExtensionButtonsComponent } from './components/extension-buttons/extension-buttons.component';
+import { DateTimeComponent } from './components/date-time/date-time.component';
+import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
+import { MomentModule } from 'ngx-moment';
+import { MetricsRangeSelectorComponent } from './components/metrics-range-selector/metrics-range-selector.component';
+import { MetricsParentRangeSelectorComponent } from './components/metrics-parent-range-selector/metrics-parent-range-selector.component';
+import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 
 @NgModule({
   imports: [
@@ -142,6 +151,7 @@ import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/c
     CfAuthModule,
     CdkTableModule,
     NgxChartsModule,
+    MomentModule,
   ],
   declarations: [
     LoadingPageComponent,
@@ -232,6 +242,12 @@ import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/c
     CreateApplicationStep1Component,
     BindAppsStepComponent,
     CfEndpointsMissingComponent,
+    CapitalizeFirstPipe,
+    RoutingIndicatorComponent,
+    DateTimeComponent,
+    StartEndDateComponent,
+    MetricsRangeSelectorComponent,
+    MetricsParentRangeSelectorComponent,
   ],
   exports: [
     FormsModule,
@@ -318,7 +334,13 @@ import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/c
     SelectServiceComponent,
     CreateApplicationStep1Component,
     BindAppsStepComponent,
-    CfEndpointsMissingComponent
+    CapitalizeFirstPipe,
+    CfEndpointsMissingComponent,
+    RoutingIndicatorComponent,
+    DateTimeComponent,
+    StartEndDateComponent,
+    MetricsRangeSelectorComponent,
+    MetricsParentRangeSelectorComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
@@ -336,7 +358,8 @@ import { CfEndpointsMissingComponent } from './components/cf-endpoints-missing/c
     PaginationMonitorFactory,
     CloudFoundryService,
     InternalEventMonitorFactory,
-    ServiceActionHelperService
+    ServiceActionHelperService,
+    MetricsRangeSelectorService
   ]
 })
 export class SharedModule { }

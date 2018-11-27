@@ -9,15 +9,24 @@ import { pathGet } from '../../core/utils.service';
 import { SetClientFilter } from '../../store/actions/pagination.actions';
 import { RouterNav } from '../../store/actions/router.actions';
 import { AppState } from '../../store/app-state';
-import { applicationSchemaKey } from '../../store/helpers/entity-factory';
+import { applicationSchemaKey, endpointSchemaKey } from '../../store/helpers/entity-factory';
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';
 import { APIResource } from '../../store/types/api.types';
 import { PaginationEntityState } from '../../store/types/pagination.types';
-import { CfUser, OrgUserRoleNames, SpaceUserRoleNames, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
+import {
+  CfUser,
+  CfUserRoleParams,
+  OrgUserRoleNames,
+  SpaceUserRoleNames,
+  UserRoleInOrg,
+  UserRoleInSpace,
+} from '../../store/types/user.types';
 import { UserRoleLabels } from '../../store/types/users-roles.types';
-import { ActiveRouteCfOrgSpace } from './cf-page.types';
+import { ActiveRouteCfOrgSpace, ActiveRouteCfCell } from './cf-page.types';
 import { ICfRolesState } from '../../store/types/current-user-roles.types';
 import { getCurrentUserCFEndpointRolesState } from '../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
+import { EndpointModel } from '../../store/types/endpoint.types';
+import { selectEntities } from '../../store/selectors/api.selectors';
 
 
 export interface IUserRole<T> {
@@ -117,37 +126,37 @@ function assignRole(currentRoles: string, role: string) {
 }
 
 export function isOrgManager(user: CfUser, guid: string): boolean {
-  return hasRole(user, guid, 'managed_organizations');
+  return hasRole(user, guid, CfUserRoleParams.MANAGED_ORGS);
 }
 
 export function isOrgBillingManager(user: CfUser, guid: string): boolean {
-  return hasRole(user, guid, 'billing_managed_organizations');
+  return hasRole(user, guid, CfUserRoleParams.BILLING_MANAGER_ORGS);
 }
 
 export function isOrgAuditor(user: CfUser, guid: string): boolean {
-  return hasRole(user, guid, 'audited_organizations');
+  return hasRole(user, guid, CfUserRoleParams.AUDITED_ORGS);
 }
 
 export function isOrgUser(user: CfUser, guid: string): boolean {
-  return hasRole(user, guid, 'organizations');
+  return hasRole(user, guid, CfUserRoleParams.ORGANIZATIONS);
 }
 
 export function isSpaceManager(user: CfUser, spaceGuid: string): boolean {
-  return hasRole(user, spaceGuid, 'managed_spaces');
+  return hasRole(user, spaceGuid, CfUserRoleParams.MANAGED_SPACES);
 }
 
 export function isSpaceAuditor(user: CfUser, spaceGuid: string): boolean {
-  return hasRole(user, spaceGuid, 'audited_spaces');
+  return hasRole(user, spaceGuid, CfUserRoleParams.AUDITED_SPACES);
 }
 
 export function isSpaceDeveloper(user: CfUser, spaceGuid: string): boolean {
-  return hasRole(user, spaceGuid, 'spaces');
+  return hasRole(user, spaceGuid, CfUserRoleParams.SPACES);
 }
 
 function hasRole(user: CfUser, guid: string, roleType: string) {
   if (user[roleType]) {
     const roles = user[roleType] as APIResource[];
-    return !!roles.find(o => o.metadata.guid === guid);
+    return !!roles.find(o => o ? o.metadata.guid === guid : false);
   }
   return false;
 }
@@ -171,9 +180,24 @@ export function getActiveRouteCfOrgSpace(activatedRoute: ActivatedRoute) {
   });
 }
 
+export function getActiveRouteCfCell(activatedRoute: ActivatedRoute) {
+  return ({
+    cfGuid: getIdFromRoute(activatedRoute, 'cfId'),
+    cellId: getIdFromRoute(activatedRoute, 'cellId'),
+  });
+}
+
 export const getActiveRouteCfOrgSpaceProvider = {
   provide: ActiveRouteCfOrgSpace,
   useFactory: getActiveRouteCfOrgSpace,
+  deps: [
+    ActivatedRoute,
+  ]
+};
+
+export const getActiveRouteCfCellProvider = {
+  provide: ActiveRouteCfCell,
+  useFactory: getActiveRouteCfCell,
   deps: [
     ActivatedRoute,
   ]
@@ -223,4 +247,21 @@ export function waitForCFPermissions(store: Store<AppState>, cfGuid: string): Ob
     publishReplay(1),
     refCount(),
   );
+}
+
+export function selectConnectedCfs(store: Store<AppState>): Observable<EndpointModel[]> {
+  return store.select(selectEntities<EndpointModel>(endpointSchemaKey)).pipe(
+    map(endpoints => Object.values(endpoints)),
+    map(endpoints => endpoints.filter(endpoint => endpoint.cnsi_type === 'cf' && endpoint.connectionStatus === 'connected')),
+  );
+}
+
+export function haveMultiConnectedCfs(store: Store<AppState>): Observable<boolean> {
+  return selectConnectedCfs(store).pipe(
+    map(connectedCfs => connectedCfs.length > 1)
+  );
+}
+
+export function filterEntitiesByGuid<T>(guid: string, array?: Array<APIResource<T>>): Array<APIResource<T>> {
+  return array ? array.filter(entity => entity.metadata.guid === guid) : null;
 }

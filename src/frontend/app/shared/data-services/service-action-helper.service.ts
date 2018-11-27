@@ -8,7 +8,7 @@ import { DeleteServiceBinding } from '../../store/actions/service-bindings.actio
 import { DeleteServiceInstance } from '../../store/actions/service-instances.actions';
 import { IServiceBinding } from '../../core/cf-api-svc.types';
 import { APIResource } from '../../store/types/api.types';
-import { RouterNav } from '../../store/actions/router.actions';
+import { RouterNav, RouterQueryParams } from '../../store/actions/router.actions';
 
 @Injectable()
 export class ServiceActionHelperService {
@@ -50,11 +50,14 @@ export class ServiceActionHelperService {
 
   deleteServiceInstance = (
     serviceInstanceGuid: string,
+    serviceInstanceName: string,
     endpointGuid: string
   ) => {
     const confirmation = new ConfirmationDialogConfig(
       'Delete Service Instance',
-      'Are you sure you want to delete the service instance?',
+      {
+        textToMatch: serviceInstanceName
+      },
       'Delete',
       true
     );
@@ -64,6 +67,6 @@ export class ServiceActionHelperService {
   }
 
 
-  editServiceBinding = (guid: string, endpointGuid: string) =>
-    this.store.dispatch(new RouterNav({ path: ['/services', endpointGuid, guid, 'edit'] }))
+  editServiceBinding = (guid: string, endpointGuid: string, query: RouterQueryParams = {}) =>
+    this.store.dispatch(new RouterNav({ path: ['/services', endpointGuid, guid, 'edit'], query: query }))
 }

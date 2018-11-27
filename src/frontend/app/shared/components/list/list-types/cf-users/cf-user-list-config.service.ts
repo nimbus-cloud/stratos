@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { filter, map, tap } from 'rxjs/operators';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { filter, map, switchMap, tap } from 'rxjs/operators';
 
+import { IOrganization, ISpace } from '../../../../../core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../core/current-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
@@ -11,7 +12,7 @@ import { canUpdateOrgSpaceRoles, waitForCFPermissions } from '../../../../../fea
 import { UsersRolesSetUsers } from '../../../../../store/actions/users-roles.actions';
 import { CfUser } from '../../../../../store/types/user.types';
 import { AppState } from './../../../../../store/app-state';
-import { APIResource } from './../../../../../store/types/api.types';
+import { APIResource, EntityInfo } from './../../../../../store/types/api.types';
 import { CfUserService } from './../../../../data-services/cf-user.service';
 import { ITableColumn } from './../../list-table/table.types';
 import { IListAction, IMultiListAction, ListConfig, ListViewTypes } from './../../list.component.types';
@@ -87,7 +88,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     description: `Change Roles`,
   };
 
-  createManagerUsersUrl(user: APIResource<CfUser> = null): string {
+  private createManagerUsersUrl(user: APIResource<CfUser> = null): string {
     let route = `/cloud-foundry/${this.cfUserService.activeRouteCfOrgSpace.cfGuid}`;
     if (this.activeRouteCfOrgSpace.orgGuid) {
       route += `/organizations/${this.activeRouteCfOrgSpace.orgGuid}`;
@@ -104,17 +105,81 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     private cfUserService: CfUserService,
     private router: Router,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private userPerms: CurrentUserPermissionsService
+    private userPerms: CurrentUserPermissionsService,
+    org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
+    space$?: Observable<EntityInfo<APIResource<ISpace>>>,
   ) {
     super();
+
+    this.assignColumnConfig(org$, space$);
+
     this.initialised = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
-      tap(cf => {
-        const action = CfUserService.createPaginationAction(activeRouteCfOrgSpace.cfGuid, cf.global.isAdmin);
+      switchMap(cf => // `cf` needed to create the second observable
+        combineLatest(
+          observableOf(cf),
+          (space$ || observableOf(null)).pipe(switchMap(space => cfUserService.createPaginationAction(cf.global.isAdmin, !!space)))
+        )
+      ),
+      tap(([cf, action]) => {
         this.dataSource = new CfUserDataSourceService(store, action, this);
       }),
-      map(cf => cf && cf.state.initialised),
+      map(([cf, action]) => cf && cf.state.initialised)
     );
     this.manageMultiUserAction.visible$ = this.createCanUpdateOrgSpaceRoles();
+  }
+
+  /**
+   * Assign the org and/or spaces obs to the cell configs. These will be used to determine which org or space roles to show
+   *
+   * @private
+   * @memberof CfUserListConfigService
+   */
+  private assignColumnConfig = (
+    org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
+    space$?: Observable<EntityInfo<APIResource<ISpace>>>) => {
+
+    const { safeOrg$, safeSpaces$ } = this.getSafeObservables(org$, space$);
+
+    this.columns.find(column => column.columnId === 'roles').cellConfig = {
+      org$: safeOrg$
+    };
+    this.columns.find(column => column.columnId === 'space-roles').cellConfig = {
+      org$: safeOrg$,
+      spaces$: safeSpaces$
+    };
+  }
+
+  private getSafeObservables(
+    org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
+    space$?: Observable<EntityInfo<APIResource<ISpace>>>
+  ) {
+    if (space$ && org$) {
+      // List should show specific org and specific space roles
+      return {
+        safeOrg$: org$.pipe(map(org => org ? org.entity : null)),
+        safeSpaces$: space$.pipe(
+          map(space => [space.entity])
+        )
+      };
+    } else if (org$) {
+      // List should show specific org and space roles from with org
+      const safeOrg$ = org$.pipe(map(org => org ? org.entity : null));
+      return {
+        safeOrg$,
+        safeSpaces$: safeOrg$.pipe(
+          map((org: APIResource<IOrganization>) => org.entity.spaces),
+          // Important for when we fetch spaces async. This prevents the null passing through, which would mean all spaces are shown aka use
+          // case below
+          filter(spaces => !!spaces)
+        )
+      };
+    } else {
+      // List should show all org and all space roles
+      return {
+        safeOrg$: observableOf(null),
+        safeSpaces$: observableOf(null)
+      };
+    }
   }
 
   private createCanUpdateOrgSpaceRoles = () => canUpdateOrgSpaceRoles(
