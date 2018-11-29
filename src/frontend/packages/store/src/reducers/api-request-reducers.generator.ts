@@ -29,8 +29,8 @@ import {
   appAutoscalerPolicySchemaKey,
   appAutoscalerHealthSchemaKey,
   appAutoscalerScalingHistorySchemaKey,
-  appAutoscalerAppMetricHistorySchemaKey,
-  appAutoscalerInsMetricHistorySchemaKey,
+  appAutoscalerAppMetricSchemaKey,
+  appAutoscalerInsMetricSchemaKey,
 } from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
 import { RequestTypes } from './../actions/request.actions';
@@ -122,8 +122,8 @@ const entities = [
   appAutoscalerPolicySchemaKey,
   appAutoscalerHealthSchemaKey,
   appAutoscalerScalingHistorySchemaKey,
-  appAutoscalerAppMetricHistorySchemaKey,
-  appAutoscalerInsMetricHistorySchemaKey,
+  appAutoscalerAppMetricSchemaKey,
+  appAutoscalerInsMetricSchemaKey,
 ];
 
 export function registerAPIRequestEntity(schemaKey: string) {
