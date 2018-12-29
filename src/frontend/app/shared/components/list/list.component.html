@@ -16,7 +16,7 @@
           <div class="list-component__header__left--multi-filters" [hidden]="(!(hasRows$ | async) && !filter) || (isAddingOrSelecting$ | async)">
             <mat-form-field *ngFor="let multiFilterConfig of multiFilterConfigs" [floatLabel]="'never'" id="list-component__header-filter_{{multiFilterConfig.key}}">
               <mat-select id="{{multiFilterConfig.key}}" matInput [(value)]="multiFilters[multiFilterConfig.key]" [disabled]="(dataSource.isLoadingPage$ | async) || (multiFilterConfig.loading$ | async) || !(multiFilterConfig.list$ | async) || !(multiFilterConfig.list$ | async).length" (selectionChange)="multiFilterConfig.select.next($event.value)">
-                <mat-option>All</mat-option>
+                <mat-option>{{ multiFilterConfig.allLabel || 'All' }}</mat-option>
                 <mat-option *ngFor="let selectItem of multiFilterConfig.list$ | async" [value]="selectItem.value">
                   {{selectItem.label}}
                 </mat-option>
@@ -35,7 +35,7 @@
           </div>
           <!-- Sort Button & Drop down -->
           <div class="sort" [hidden]="(view$ | async) === 'table' || sortColumns.length < 1 || (isAddingOrSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && !(hasRowsOrIsFiltering$ | async))">
-            <mat-form-field>
+            <mat-form-field class="list-component__header__right-sort">
               <mat-select name="sort-field" matInput [(ngModel)]="headerSort.value" shouldPlaceholderFloat="false" [disabled]="(disableActions$ | async)" (selectionChange)="updateListSort($event.value, headerSort.direction)">
                 <mat-option *ngFor="let column of sortColumns" [value]="column.columnId">
                   {{column.headerCell()}}

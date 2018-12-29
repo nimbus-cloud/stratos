@@ -18,7 +18,7 @@ import {
 } from '../../../../../store/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../store/app-state';
-import { entityFactory, githubBranchesSchemaKey, githubCommitSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { entityFactory, gitBranchesSchemaKey, gitCommitSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { selectEntity } from '../../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../../store/types/api.types';
 import { GitCommit } from '../../../../../store/types/git.types';
@@ -43,13 +43,14 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       );
       // Set Project data
       this.store.dispatch(
-        new CheckProjectExists(null, this.projectName)
+        new CheckProjectExists(this.scm, this.projectName)
       );
       // Set Source type
       this.store.dispatch(
         new SetAppSourceDetails({
-          name: 'GitHub',
-          id: 'github'
+          name: this.scm.getLabel(),
+          id: this.scm.getType(),
+          group: 'gitscm'
         })
       );
       // Set branch
@@ -132,8 +133,8 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
 
       const branchKey = `${this.projectName}-${stratosProject.deploySource.branch}`;
       const gitBranchEntityService = this.entityServiceFactory.create<APIResource>(
-        githubBranchesSchemaKey,
-        entityFactory(githubBranchesSchemaKey),
+        gitBranchesSchemaKey,
+        entityFactory(gitBranchesSchemaKey),
         branchKey,
         new FetchBranchesForProject(this.scm, this.projectName),
         false
@@ -157,7 +158,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
 
   private setDeployedCommitDetails() {
     this.store.select(
-      selectEntity<APIResource<GitCommit>>(githubCommitSchemaKey, this.projectName + '-' + this.deployedCommitSha))
+      selectEntity<APIResource<GitCommit>>(gitCommitSchemaKey, this.projectName + '-' + this.deployedCommitSha))
       .pipe(
         filter(deployedCommit => !!deployedCommit),
         first(),

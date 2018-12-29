@@ -76,9 +76,6 @@ import { FocusDirective } from './components/focus.directive';
 import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
 import { listCardComponents } from './components/list/list-cards/card.types';
-import {
-  AppEventDetailDialogComponentComponent,
-} from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
 import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
 import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
@@ -140,6 +137,7 @@ import { MomentModule } from 'ngx-moment';
 import { MetricsRangeSelectorComponent } from './components/metrics-range-selector/metrics-range-selector.component';
 import { MetricsParentRangeSelectorComponent } from './components/metrics-parent-range-selector/metrics-parent-range-selector.component';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
+import { MultilineTitleComponent } from './components/multiline-title/multiline-title.component';
 
 @NgModule({
   imports: [
@@ -170,7 +168,6 @@ import { MetricsRangeSelectorService } from './services/metrics-range-selector.s
     CodeBlockComponent,
     EventTabActorIconPipe,
     LogViewerComponent,
-    AppEventDetailDialogComponentComponent,
     NoContentMessageComponent,
     EndpointsMissingComponent,
     DialogErrorComponent,
@@ -248,6 +245,7 @@ import { MetricsRangeSelectorService } from './services/metrics-range-selector.s
     StartEndDateComponent,
     MetricsRangeSelectorComponent,
     MetricsParentRangeSelectorComponent,
+    MultilineTitleComponent,
   ],
   exports: [
     FormsModule,
@@ -343,7 +341,6 @@ import { MetricsRangeSelectorService } from './services/metrics-range-selector.s
     MetricsParentRangeSelectorComponent
   ],
   entryComponents: [
-    AppEventDetailDialogComponentComponent,
     DialogConfirmComponent,
     EnvVarViewComponent,
     NoServicePlansComponent
