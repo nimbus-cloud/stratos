@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -33,6 +33,18 @@ import { ActionState } from '../api-request-reducer/types';
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
   entities$: Observable<T[]>;
+  /**
+   * TODO: RC
+   */
+  maxedEntities$: Observable<T[]>;
+  /**
+ * TODO: RC
+ */
+  hasMaxedEntities$: Observable<boolean>;
+  /**
+ * TODO: RC
+ */
+  totalResults$: Observable<number>;
 }
 
 export function qParamsToString(params: QParam[]): string[] {
@@ -198,7 +210,10 @@ function getObservables<T = any>(
 
   // .pipe(distinctUntilChanged())
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
-  const pagination$: Observable<PaginationEntityState> = paginationSelect$.pipe(filter(pagination => !!pagination));
+  const pagination$: Observable<PaginationEntityState> = paginationSelect$.pipe(
+    filter(pagination => !!pagination),
+    distinctUntilChanged()
+  );
 
   // Keep this separate, we don't want tap executing every time someone subscribes
   const fetchPagination$ = paginationSelect$.pipe(
@@ -237,16 +252,28 @@ function getObservables<T = any>(
             ));
           }
         }),
-        switchMap(() => paginationMonitor.currentPage$)
+        switchMap(() => paginationMonitor.currentPage$),
+        distinctUntilChanged()
       );
 
+  const maxedEntities$ = entities$.pipe(// Ensure we sub to entities to kick off fetch process
+    switchMap(() => pagination$),
+    filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[1] && !pagination.pageRequests[1].busy),
+    switchMap(pagination => pagination.maxedResults ? observableOf(null) : entities$)
+  );
+  const hasMaxedEntities$ = maxedEntities$.pipe(
+    map(maxedEntities => !!maxedEntities)
+  );
+  const totalResults$ = pagination$.pipe(
+    map(pag => pag.totalResults)
+  );
+
   return {
-    pagination$: pagination$.pipe(
-      distinctUntilChanged()
-    ),
-    entities$: entities$.pipe(
-      distinctUntilChanged()
-    )
+    pagination$,
+    entities$,
+    maxedEntities$,
+    hasMaxedEntities$,
+    totalResults$,
   };
 }
 
