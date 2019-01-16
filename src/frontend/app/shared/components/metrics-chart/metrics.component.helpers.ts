@@ -29,7 +29,8 @@ export class MetricsChartHelpers {
   }
 }
 export enum ChartDataTypes {
-  BYTES = 'bytes'
+  BYTES = 'bytes',
+  CPU_PERCENT = 'cpu-percent'
 }
 export function getMetricsChartConfigBuilder<T = any>(getSeriesName: (result) => string) {
   return (
@@ -57,10 +58,22 @@ export function buildMetricsChartConfig<T = any>(
       getSeriesName,
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       sort: MetricsChartHelpers.sortBySeriesName,
-      mapSeriesItemValue: dataType === ChartDataTypes.BYTES ? (bytes) => (bytes / 1000000).toFixed(2) : null,
+      mapSeriesItemValue: _getSeriesItemMapper(dataType),
       metricsAction,
       filterSeries: filterSeries,
     },
     MetricsChartHelpers.buildChartConfig(yAxisLabel, yAxisTickFormatter)
   ];
+}
+
+function _getSeriesItemMapper(chartItemType: ChartDataTypes) {
+  switch (chartItemType) {
+    case ChartDataTypes.BYTES:
+      return (bytes) => (bytes / 1000000).toFixed(2);
+    case ChartDataTypes.CPU_PERCENT:
+      return (cpu) => (cpu).toFixed(2);
+    default:
+      return null;
+  }
+
 }
