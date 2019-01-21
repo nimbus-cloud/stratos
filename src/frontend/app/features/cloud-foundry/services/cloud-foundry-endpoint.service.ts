@@ -12,7 +12,8 @@ import { GetAllApplications } from '../../../store/actions/application.actions';
 import { GetCFInfo } from '../../../store/actions/cloud-foundry.actions';
 import { FetchAllDomains } from '../../../store/actions/domains.actions';
 import { GetAllEndpoints } from '../../../store/actions/endpoint.actions';
-import { DeleteOrganization, GetAllOrganizations } from '../../../store/actions/organization.actions';
+import { DeleteOrganization, GetAllOrganizations, GetAllOrgUsers } from '../../../store/actions/organization.actions';
+import { GetAllSpaceUsers } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import {
   cfInfoSchemaKey,
@@ -30,7 +31,10 @@ import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
 } from '../../../store/helpers/entity-relations/entity-relations.types';
-import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import {
+  getPaginationObservables,
+  PaginationObservables,
+} from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { CfApplicationState } from '../../../store/types/application.types';
 import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
@@ -58,11 +62,13 @@ export class CloudFoundryEndpointService {
   hasSSHAccess$: Observable<boolean>;
   totalMem$: Observable<number>;
   paginationSubscription: any;
-  allApps$: Observable<APIResource<IApp>[]>;
-  hasAllApps$: Observable<boolean>;
+  // allApps$: Observable<APIResource<IApp>[]>;
+  // hasAllApps$: Observable<boolean>;
   loadingApps$: Observable<boolean>;
-  totalApps$: Observable<number>;
-  users$: Observable<APIResource<CfUser>[]>;
+  // totalApps$: Observable<number>;
+  appsPaginationObs: PaginationObservables<APIResource<IApp>>;
+  usersPaginationObs$: Observable<PaginationObservables<APIResource<CfUser>>>;
+  // users$: Observable<APIResource<CfUser>[]>;
   orgs$: Observable<APIResource<IOrganization>[]>;
   info$: Observable<EntityInfo<APIResource<ICfV2Info>>>;
   cfInfoEntityService: EntityService<APIResource<ICfV2Info>>;
@@ -120,6 +126,26 @@ export class CloudFoundryEndpointService {
     return fetchTotalResults(action, store, pmf);
   }
 
+  public static fetchUserCount(
+    store: Store<AppState>,
+    pmf: PaginationMonitorFactory,
+    cfGuid: string,
+    orgGuid?: string,
+    spaceGuid?: string,
+    isAdmin = false)
+    : Observable<number> {
+    const parentSchemaKey = spaceGuid ? spaceSchemaKey : orgGuid ? organizationSchemaKey : 'cf';
+    const uniqueKey = spaceGuid || orgGuid || cfGuid;
+    // TODO: RC transition to users tabs...//  to  + 'count'
+    const paginationKey = createEntityRelationPaginationKey(parentSchemaKey, uniqueKey);
+    if (spaceGuid) {
+      return fetchTotalResults(new GetAllSpaceUsers(spaceGuid, paginationKey, cfGuid, isAdmin, []), store, pmf);
+    } else if (orgGuid) {
+      return fetchTotalResults(new GetAllOrgUsers(orgGuid, paginationKey, cfGuid, isAdmin, []), store, pmf);
+    }
+    return fetchTotalResults(new GetAllApplications(paginationKey, cfGuid, [], false), store, pmf);
+  }
+
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
@@ -162,29 +188,41 @@ export class CloudFoundryEndpointService {
       )
     }, true).entities$;
 
-    this.users$ = this.cfUserService.getUsers(this.cfGuid);
+    // this.users$ = this.cfUserService.getUsers(this.cfGuid);
 
     this.info$ = this.cfInfoEntityService.waitForEntity$;
 
-    this.constructAppObservables();
+    this.constructPagObservables();
 
     this.fetchDomains();
   }
 
-  constructAppObservables() {
+  constructPagObservables() {
 
-    const pagObs = getPaginationObservables<APIResource<IApp>>({
+    this.appsPaginationObs = getPaginationObservables<APIResource<IApp>>({
       store: this.store,
       action: this.getAllAppsAction,
       paginationMonitor: this.pmf.create(this.getAllAppsAction.paginationKey, entityFactory(this.getAllAppsAction.entityKey))
     });
 
+    // this.loadingApps$ = pagObs.entities$.pipe(// Ensure we sub to entities to kick off fetch process
+    //   -      switchMap(() => pagObs.pagination$),
+    //   -      filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[pagination.currentPage]),
+    //   -      map(pagination => pagination.pageRequests[pagination.currentPage].busy)
+
+    this.loadingApps$ = this.appsPaginationObs.pagination$.pipe(// Ensure we sub to entities to kick off fetch process
+      filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[pagination.currentPage]),
+      map(pagination => pagination.pageRequests[pagination.currentPage].busy)
+    );
+
+    this.usersPaginationObs$ = this.cfUserService.getUsersPaginationObs(this.activeRouteCfOrgSpace.cfGuid);
+
     // TODO: RC update for 'user'
-    this.allApps$ = pagObs.maxedEntities$;
+    // this.allApps$ = pagObs.entitiesMaxed$;
 
-    this.hasAllApps$ = pagObs.hasMaxedEntities$;
+    // this.hasAllApps$ = pagObs.hasEntitiesMaxed$;
 
-    this.totalApps$ = pagObs.totalResults$;
+    // this.totalApps$ = pagObs.totalResults$;
   }
 
   private constructSecondaryObservable() {
@@ -194,7 +232,7 @@ export class CloudFoundryEndpointService {
         p.entity.entity.app_ssh_host_key_fingerprint &&
         p.entity.entity.app_ssh_oauth_client))
     );
-    this.totalMem$ = this.allApps$.pipe(map(apps => this.getMetricFromApps(apps, 'memory')));
+    this.totalMem$ = this.appsPaginationObs.entitiesMaxed$.pipe(map(apps => this.getMetricFromApps(apps, 'memory')));
 
     this.connected$ = this.endpoint$.pipe(
       map(p => p.entity.connectionStatus === 'connected')
@@ -204,7 +242,7 @@ export class CloudFoundryEndpointService {
   }
 
   public getAppsInOrgViaAllApps(org: APIResource<IOrganization>): Observable<APIResource<IApp>[]> {
-    return this.allApps$.pipe(
+    return this.appsPaginationObs.entitiesMaxed$.pipe(
       filter(allApps => !!allApps),
       map(allApps => {
         const spaces = org.entity.spaces || [];
@@ -215,7 +253,7 @@ export class CloudFoundryEndpointService {
   }
 
   public getAppsInSpaceViaAllApps(space: APIResource<ISpace>): Observable<APIResource<IApp>[]> {
-    return this.allApps$.pipe(
+    return this.appsPaginationObs.entitiesMaxed$.pipe(
       filter(allApps => !!allApps),
       map(apps => {
         return apps.filter(a => a.entity.space_guid === space.metadata.guid);

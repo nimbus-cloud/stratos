@@ -1,7 +1,6 @@
-
-import { combineLatest as observableCombineLatest, BehaviorSubject, Observable } from 'rxjs';
 import { AfterContentInit, Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { BehaviorSubject, combineLatest as observableCombineLatest, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { IOrganization } from '../../../../../core/cf-api.types';
@@ -14,11 +13,9 @@ import {
 import { ITableColumn } from '../../../../../shared/components/list/list-table/table.types';
 import {
   TableCellConfirmOrgSpaceComponent,
-  // tslint:disable-next-line:max-line-length
 } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
 import {
   TableCellConfirmRoleAddRemComponent,
-  // tslint:disable-next-line:max-line-length
 } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { UsersRolesClearUpdateState } from '../../../../../store/actions/users-roles.actions';
@@ -35,6 +32,7 @@ import { APIResource } from '../../../../../store/types/api.types';
 import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/types/user.types';
 import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { CfRolesService } from '../cf-roles.service';
+
 
 @Component({
   selector: 'app-manage-users-confirm',

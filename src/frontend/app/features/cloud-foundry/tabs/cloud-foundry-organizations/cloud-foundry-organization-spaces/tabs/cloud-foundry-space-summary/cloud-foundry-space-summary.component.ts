@@ -18,7 +18,7 @@ export class CloudFoundrySpaceSummaryComponent {
     public cfSpaceService: CloudFoundrySpaceService
   ) {
     this.detailsLoading$ = combineLatest([
-      cfEndpointService.hasAllApps$,
+      cfEndpointService.appsPaginationObs.hasEntitiesMaxed$,
       cfSpaceService.appCount$,
       cfSpaceService.allSpaceUsers$
     ]).pipe(

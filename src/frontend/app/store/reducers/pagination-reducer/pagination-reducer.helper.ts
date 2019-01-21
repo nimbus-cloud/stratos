@@ -34,16 +34,16 @@ export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
   entities$: Observable<T[]>;
   /**
-   * TODO: RC
+   * All entities, or if list is maxed null
    */
-  maxedEntities$: Observable<T[]>;
+  entitiesMaxed$: Observable<T[]>;
   /**
- * TODO: RC
- */
-  hasMaxedEntities$: Observable<boolean>;
+   * True if list does not contain all expected entities (there were too many to fetch)
+   */
+  hasEntitiesMaxed$: Observable<boolean>;
   /**
- * TODO: RC
- */
+   * Convenience accessor for the pagination's totalResults property
+   */
   totalResults$: Observable<number>;
 }
 
@@ -259,7 +259,9 @@ function getObservables<T = any>(
   const maxedEntities$ = entities$.pipe(// Ensure we sub to entities to kick off fetch process
     switchMap(() => pagination$),
     filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[1] && !pagination.pageRequests[1].busy),
-    switchMap(pagination => pagination.maxedResults ? observableOf(null) : entities$)
+    switchMap(pagination => pagination.maxedResults ? observableOf(null) : entities$),
+    publishReplay(1),
+    refCount()
   );
   const hasMaxedEntities$ = maxedEntities$.pipe(
     map(maxedEntities => !!maxedEntities)
@@ -271,8 +273,8 @@ function getObservables<T = any>(
   return {
     pagination$,
     entities$,
-    maxedEntities$,
-    hasMaxedEntities$,
+    entitiesMaxed$: maxedEntities$,
+    hasEntitiesMaxed$: hasMaxedEntities$,
     totalResults$,
   };
 }

@@ -27,7 +27,7 @@ export class CloudFoundryOrganizationSummaryComponent {
       goToAppWall(store, cfOrgService.cfGuid, cfOrgService.orgGuid);
     };
     this.detailsLoading$ = combineLatest([
-      cfEndpointService.hasAllApps$,
+      cfEndpointService.appsPaginationObs.hasEntitiesMaxed$,
       cfOrgService.allOrgUsers$,
       cfOrgService.appCount$
     ]).pipe(

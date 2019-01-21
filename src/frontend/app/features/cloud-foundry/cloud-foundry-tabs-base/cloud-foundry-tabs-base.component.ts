@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, of as observableOf } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { map, startWith, switchMap } from 'rxjs/operators';
 
 import { environment } from '../../../../environments/environment';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
@@ -46,7 +46,8 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       .can(CurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid)
       .pipe(map(visible => !visible));
 
-    const usersHidden$ = cfEndpointService.users$.pipe(
+    const usersHidden$ = cfEndpointService.usersPaginationObs$.pipe(
+      switchMap(pag => pag.entities$),
       startWith(null),
       map(users => !users)
     );

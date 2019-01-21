@@ -1,4 +1,3 @@
-/* tslint:disable:max-line-length */
 import { CdkTableModule } from '@angular/cdk/table';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
@@ -145,6 +144,7 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { UserPermissionDirective } from './user-permission.directive';
 
+/* tslint:disable:max-line-length */
 @NgModule({
   imports: [
     CommonModule,
@@ -361,7 +361,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     ListConfig,
     ApplicationStateService,
     CfOrgSpaceDataService,
-    CfUserService,
+    CfUserService,//TODO: RC required?
     ConfirmationDialogService,
     EntityMonitorFactory,
     PaginationMonitorFactory,
