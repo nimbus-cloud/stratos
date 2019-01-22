@@ -9,11 +9,10 @@ import { getStartedAppInstanceCount } from '../../../core/cf.helpers';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { GetAllSpaceUsers, GetSpace } from '../../../store/actions/space.actions';
+import { GetSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import {
   applicationSchemaKey,
-  cfUserSchemaKey,
   entityFactory,
   routeSchemaKey,
   serviceBindingSchemaKey,
@@ -26,9 +25,8 @@ import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
 } from '../../../store/helpers/entity-relations/entity-relations.types';
-import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { CfUser, SpaceUserRoleNames } from '../../../store/types/user.types';
+import { SpaceUserRoleNames } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
@@ -51,7 +49,8 @@ export class CloudFoundrySpaceService {
   appCount$: Observable<number>;
   loadingApps$: Observable<boolean>;
   space$: Observable<EntityInfo<APIResource<ISpace>>>;
-  allSpaceUsers$: Observable<APIResource<CfUser>[]>;
+  usersCount$: Observable<number | null>;
+  // allSpaceUsers$: Observable<APIResource<CfUser>[]>;
   usersPaginationKey: string;
 
   constructor(
@@ -135,19 +134,20 @@ export class CloudFoundrySpaceService {
       }
     }));
 
-    this.allSpaceUsers$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
-      switchMap(isAdmin => {
-        const action = new GetAllSpaceUsers(this.spaceGuid, this.usersPaginationKey, this.cfGuid, isAdmin);
-        return getPaginationObservables({
-          store: this.store,
-          action,
-          paginationMonitor: this.paginationMonitorFactory.create(
-            this.usersPaginationKey,
-            entityFactory(cfUserSchemaKey)
-          )
-        }).entities$;
-      })
-    );
+    // this.allSpaceUsers$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
+    //   switchMap(isAdmin => {
+    //     const action = new GetAllSpaceUsers(this.spaceGuid, this.usersPaginationKey, this.cfGuid, isAdmin);
+    //     return getPaginationObservables({
+    //       store: this.store,
+    //       action,
+    //       paginationMonitor: this.paginationMonitorFactory.create(
+    //         this.usersPaginationKey,
+    //         entityFactory(cfUserSchemaKey)
+    //       )
+    //     }).entities$;
+    //   })
+    // );
+    this.usersCount$ = this.cfUserService.fetchTotalUsers(this.cfGuid, this.orgGuid, this.spaceGuid);
   }
 
   private initialiseAppObservables() {

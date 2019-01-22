@@ -24,7 +24,7 @@ export class CloudFoundrySummaryTabComponent {
       cfEndpointService.appsPagObs.fetchingEntities$.pipe(
         filter(loading => !loading)
       ),
-      cfEndpointService.users$
+      cfEndpointService.usersCount$
     ]).pipe(
       map(() => false),
       startWith(true)

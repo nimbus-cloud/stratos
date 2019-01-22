@@ -30,8 +30,8 @@ export class CloudFoundryOrganizationSummaryComponent {
       cfEndpointService.appsPagObs.fetchingEntities$.pipe(
         filter(loading => !loading)
       ),
-      cfOrgService.allOrgUsers$,
-      cfOrgService.appCount$
+      // cfOrgService.usersCount$,// TODO: RC decide to blip
+      // cfOrgService.appCount$
     ]).pipe(
       map(() => false),
       startWith(true)

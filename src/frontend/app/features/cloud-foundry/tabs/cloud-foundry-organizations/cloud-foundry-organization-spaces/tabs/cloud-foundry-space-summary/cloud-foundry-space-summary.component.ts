@@ -21,8 +21,8 @@ export class CloudFoundrySpaceSummaryComponent {
       cfEndpointService.appsPagObs.fetchingEntities$.pipe(
         filter(loading => !loading)
       ),
-      cfSpaceService.appCount$,
-      cfSpaceService.allSpaceUsers$
+      // cfSpaceService.appCount$,// TODO: RC decide to blip
+      // cfSpaceService.allSpaceUsers$
     ]).pipe(
       map(() => false),
       startWith(true)

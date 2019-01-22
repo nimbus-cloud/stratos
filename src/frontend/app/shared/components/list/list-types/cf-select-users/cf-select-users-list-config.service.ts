@@ -9,7 +9,6 @@ import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginatedAction } from '../../../../../store/types/pagination.types';
 import { CfUser, CfUserMissingRoles } from '../../../../../store/types/user.types';
-import { UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
@@ -20,15 +19,15 @@ import { IListConfig, IMultiListAction, ListViewTypes } from '../../list.compone
 import { ListRowSateHelper } from '../../list.helper';
 import { CfSelectUsersDataSourceService } from './cf-select-users-data-source.service';
 
-function cfUserHasAllRoleProperties(user: APIResource<CfUser>): boolean {
-  return !!user.entity.audited_organizations &&
-    !!user.entity.billing_managed_organizations &&
-    !!user.entity.managed_organizations &&
-    !!user.entity.organizations &&
-    !!user.entity.spaces &&
-    !!user.entity.audited_spaces &&
-    !!user.entity.managed_spaces;
-}
+// function cfUserHasAllRoleProperties(user: APIResource<CfUser>): boolean {
+//   return !!user.entity.audited_organizations &&
+//     !!user.entity.billing_managed_organizations &&
+//     !!user.entity.managed_organizations &&
+//     !!user.entity.organizations &&
+//     !!user.entity.spaces &&
+//     !!user.entity.audited_spaces &&
+//     !!user.entity.managed_spaces;
+// }
 
 export class CfSelectUsersListConfigService implements IListConfig<APIResource<CfUser>> {
   viewType = ListViewTypes.TABLE_ONLY;
@@ -73,7 +72,7 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
       switchMap(cf =>
         combineLatest(
           observableOf(cf),
-          cfUserService.createPaginationAction(cf.global.isAdmin, true)
+          cfUserService.createPaginationAction(cf.global.isAdmin, false, true)
         )
       ),
       tap(([cf, action]) => this.createDataSource(action)),

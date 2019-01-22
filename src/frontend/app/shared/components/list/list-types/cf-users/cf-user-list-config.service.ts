@@ -136,7 +136,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
       switchMap(cf => // `cf` needed to create the second observable
         combineLatest(
           observableOf(cf),
-          (space$ || observableOf(null)).pipe(switchMap(space => cfUserService.createPaginationAction(cf.global.isAdmin, !!space)))
+          (space$ || observableOf(null)).pipe(switchMap(space => cfUserService.createPaginationAction(cf.global.isAdmin, false, !!space)))
         )
       ),
       tap(([cf, action]) => {

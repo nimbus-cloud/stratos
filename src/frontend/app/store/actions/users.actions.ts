@@ -51,7 +51,7 @@ export const GET_CF_USERS_AS_NON_ADMIN_SUCCESS = '[Users] Get cf users by org su
 const createGetAllUsersPaginationKey = cfGuid => createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
 const createGetUsersInitialParams = () => ({
   page: 1,
-  'results-per-page': 100,
+  'results-per-page': 2, // TODO: RC fix
   'order-direction': 'desc',
   'order-direction-field': 'username',
 });
@@ -92,6 +92,7 @@ export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction
   options: RequestOptions;
   initialParams = createGetUsersInitialParams();
   flattenPagination = true;
+  flattenPaginationMax = 4; // TODO: RC fix
 }
 
 export class GetCFUser extends CFStartAction implements IRequestAction {
