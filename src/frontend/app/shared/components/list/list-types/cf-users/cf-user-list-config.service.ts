@@ -1,7 +1,7 @@
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
+import { filter, first, map, tap } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../../../core/cf-api.types';
 import { CurrentUserPermissionsChecker } from '../../../../../core/current-user-permissions.checker';
@@ -11,6 +11,7 @@ import { canUpdateOrgSpaceRoles, waitForCFPermissions } from '../../../../../fea
 import { SetClientFilter } from '../../../../../store/actions/pagination.actions';
 import { UsersRolesSetUsers } from '../../../../../store/actions/users-roles.actions';
 import { selectPaginationState } from '../../../../../store/selectors/pagination.selectors';
+import { ICfRolesState } from '../../../../../store/types/current-user-roles.types';
 import { PaginatedAction } from '../../../../../store/types/pagination.types';
 import { CfUser } from '../../../../../store/types/user.types';
 import { AppState } from './../../../../../store/app-state';
@@ -133,13 +134,19 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     this.assignMultiConfig();
 
     this.initialised = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
-      switchMap(cf => // `cf` needed to create the second observable
-        combineLatest(
-          observableOf(cf),
-          (space$ || observableOf(null)).pipe(switchMap(space => cfUserService.createPaginationAction(cf.global.isAdmin, false, !!space)))
-        )
+      // switchMap(cf => // `cf` needed to create the second observable
+      //   combineLatest(
+      //     observableOf(cf),
+      //     (space$ || observableOf(null)).pipe(switchMap(space => cfUserService.createPaginationAction(cf.global.isAdmin, false, !!space)))
+      //   )
+      // ),
+      map(cf =>
+        [
+          cf,
+          cfUserService.createPaginationAction(cf.global.isAdmin, activeRouteCfOrgSpace.orgGuid, activeRouteCfOrgSpace.spaceGuid)
+        ]
       ),
-      tap(([cf, action]) => {
+      tap(([cf, action]: [ICfRolesState, PaginatedAction]) => {
         this.dataSource = new CfUserDataSourceService(store, action, this, userHasRoles);
 
         this.initialiseMultiFilter(action);

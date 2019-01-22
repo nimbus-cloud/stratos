@@ -73,6 +73,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
   page(pageIndex: number) {
     const page = pageIndex + 1;
     if (this.dataSource.isLocal) {
+      console.log('1');
       this.store.dispatch(new SetClientPage(
         this.dataSource.entityKey, this.dataSource.paginationKey, page
       ));

@@ -89,6 +89,7 @@ export class CloudFoundrySpaceService {
       map(u => getSpaceRolesString(u))
     );
 
+    this.usersCount$ = this.cfUserService.fetchTotalUsers(this.cfGuid, this.orgGuid, this.spaceGuid);
   }
 
   private initialiseSpaceObservables() {
@@ -133,21 +134,6 @@ export class CloudFoundrySpaceService {
         return createQuotaDefinition(this.orgGuid);
       }
     }));
-
-    // this.allSpaceUsers$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
-    //   switchMap(isAdmin => {
-    //     const action = new GetAllSpaceUsers(this.spaceGuid, this.usersPaginationKey, this.cfGuid, isAdmin);
-    //     return getPaginationObservables({
-    //       store: this.store,
-    //       action,
-    //       paginationMonitor: this.paginationMonitorFactory.create(
-    //         this.usersPaginationKey,
-    //         entityFactory(cfUserSchemaKey)
-    //       )
-    //     }).entities$;
-    //   })
-    // );
-    this.usersCount$ = this.cfUserService.fetchTotalUsers(this.cfGuid, this.orgGuid, this.spaceGuid);
   }
 
   private initialiseAppObservables() {

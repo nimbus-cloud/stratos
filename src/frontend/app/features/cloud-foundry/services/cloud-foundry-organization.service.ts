@@ -64,7 +64,7 @@ export class CloudFoundryOrganizationService {
   org$: Observable<EntityInfo<APIResource<IOrganization>>>;
   // allOrgUsers$: Observable<APIResource<CfUser>[]>;
   usersCount$: Observable<number | null>;
-  usersPaginationKey: string;// TODO: RC whats this for?
+  usersPaginationKey: string; // TODO: RC whats this for?
 
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
@@ -157,6 +157,8 @@ export class CloudFoundryOrganizationService {
     );
 
     this.loadingApps$ = this.cfEndpointService.appsPagObs.fetchingEntities$;
+
+    this.usersCount$ = this.cfUserService.fetchTotalUsers(this.cfGuid, this.orgGuid);
   }
 
   private countExistingApps(): Observable<number> {
@@ -178,22 +180,6 @@ export class CloudFoundryOrganizationService {
     this.spaces$ = this.org$.pipe(map(o => o.entity.entity.spaces), filter(o => !!o));
     this.privateDomains$ = this.org$.pipe(map(o => o.entity.entity.private_domains));
     this.quotaDefinition$ = this.org$.pipe(map(o => o.entity.entity.quota_definition && o.entity.entity.quota_definition.entity));
-
-    this.usersCount$ = this.cfUserService.fetchTotalUsers(this.cfGuid, this.orgGuid);
-
-    // this.allOrgUsers$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
-    //   switchMap(isAdmin => {
-    //     const action = new GetAllOrgUsers(this.orgGuid, this.usersPaginationKey, this.cfGuid, isAdmin);
-    //     return getPaginationObservables<APIResource<CfUser>>({
-    //       store: this.store,
-    //       action,
-    //       paginationMonitor: this.paginationMonitorFactory.create(
-    //         this.usersPaginationKey,
-    //         entityFactory(cfUserSchemaKey)
-    //       )
-    //     }).entities$;
-    //   })
-    // );
   }
 
   private getFlattenedList(property: string): (source: Observable<APIResource<any>[]>) => Observable<any> {
