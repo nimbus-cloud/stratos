@@ -282,6 +282,7 @@ export function fetchTotalResults(
   action.paginationKey = createFetchTotalResultsPagKey(action.paginationKey);
   action.initialParams['results-per-page'] = 1;
   action.flattenPagination = false;
+  action['includeRelations'] = []; // TODO: RC
 
   const pagObs = getPaginationObservables({
     store,
