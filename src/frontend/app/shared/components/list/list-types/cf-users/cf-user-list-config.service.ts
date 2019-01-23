@@ -134,16 +134,10 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     this.assignMultiConfig();
 
     this.initialised = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
-      // switchMap(cf => // `cf` needed to create the second observable
-      //   combineLatest(
-      //     observableOf(cf),
-      //     (space$ || observableOf(null)).pipe(switchMap(space => cfUserService.createPaginationAction(cf.global.isAdmin, false, !!space)))
-      //   )
-      // ),
       map(cf =>
         [
           cf,
-          cfUserService.createPaginationAction(cf.global.isAdmin, activeRouteCfOrgSpace.orgGuid, activeRouteCfOrgSpace.spaceGuid)
+          cfUserService.createPaginationAction(cf.global.isAdmin, activeRouteCfOrgSpace.cfGuid, activeRouteCfOrgSpace.orgGuid, activeRouteCfOrgSpace.spaceGuid)
         ]
       ),
       tap(([cf, action]: [ICfRolesState, PaginatedAction]) => {

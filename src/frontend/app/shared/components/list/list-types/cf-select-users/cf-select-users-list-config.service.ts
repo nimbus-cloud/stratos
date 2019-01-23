@@ -69,7 +69,7 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
       map(cf =>
         [
           cf,
-          cfUserService.createPaginationAction(cf.global.isAdmin, activeRouteCfOrgSpace.orgGuid, activeRouteCfOrgSpace.spaceGuid)
+          cfUserService.createPaginationAction(cf.global.isAdmin, activeRouteCfOrgSpace.cfGuid, activeRouteCfOrgSpace.orgGuid, activeRouteCfOrgSpace.spaceGuid)
         ]
       ),
       tap(([cf, action]: [ICfRolesState, PaginatedAction]) => this.createDataSource(action)),

@@ -23,10 +23,7 @@ import {
   serviceInstancesSchemaKey,
   spaceSchemaKey,
 } from '../../../store/helpers/entity-factory';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-} from '../../../store/helpers/entity-relations/entity-relations.types';
+import { createEntityRelationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { OrgUserRoleNames } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -62,9 +59,7 @@ export class CloudFoundryOrganizationService {
   appCount$: Observable<number>;
   loadingApps$: Observable<boolean>;
   org$: Observable<EntityInfo<APIResource<IOrganization>>>;
-  // allOrgUsers$: Observable<APIResource<CfUser>[]>;
   usersCount$: Observable<number | null>;
-  usersPaginationKey: string; // TODO: RC whats this for?
 
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
@@ -76,7 +71,6 @@ export class CloudFoundryOrganizationService {
   ) {
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
-    this.usersPaginationKey = createEntityRelationPaginationKey(organizationSchemaKey, activeRouteCfOrgSpace.orgGuid);
 
     this.initialiseObservables();
   }

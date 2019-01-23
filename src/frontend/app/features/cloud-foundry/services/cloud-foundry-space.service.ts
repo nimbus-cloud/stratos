@@ -21,10 +21,7 @@ import {
   spaceSchemaKey,
   spaceWithOrgKey,
 } from '../../../store/helpers/entity-factory';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-} from '../../../store/helpers/entity-relations/entity-relations.types';
+import { createEntityRelationKey } from '../../../store/helpers/entity-relations/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { SpaceUserRoleNames } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -50,8 +47,6 @@ export class CloudFoundrySpaceService {
   loadingApps$: Observable<boolean>;
   space$: Observable<EntityInfo<APIResource<ISpace>>>;
   usersCount$: Observable<number | null>;
-  // allSpaceUsers$: Observable<APIResource<CfUser>[]>;
-  usersPaginationKey: string;
 
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
@@ -65,7 +60,6 @@ export class CloudFoundrySpaceService {
     this.spaceGuid = activeRouteCfOrgSpace.spaceGuid;
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
-    this.usersPaginationKey = createEntityRelationPaginationKey(spaceSchemaKey, activeRouteCfOrgSpace.spaceGuid);
 
     this.initialiseObservables();
   }
