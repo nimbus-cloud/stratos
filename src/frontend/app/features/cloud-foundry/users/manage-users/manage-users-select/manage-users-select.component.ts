@@ -17,7 +17,7 @@ import { CfUser } from '../../../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
 
-
+// TODO: RC is this needed?
 @Component({
   selector: 'app-manage-users-select',
   templateUrl: './manage-users-select.component.html',
@@ -31,6 +31,7 @@ import { CfRolesService } from '../cf-roles.service';
         cfUserService: CfUserService,
         paginationMonitorFactory: PaginationMonitorFactory,
         entityMonitorFactory: EntityMonitorFactory) => {
+        // TODO: RC is this needed?
         return new CfSelectUsersListConfigService(
           store,
           activeRouteCfOrgSpace.cfGuid,

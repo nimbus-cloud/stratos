@@ -57,6 +57,7 @@ const createGetUsersInitialParams = () => ({
 });
 
 export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
+  isGetAllUsersAsAdmin = true;
   paginationKey: string;
   constructor(
     public endpointGuid: string,
@@ -75,6 +76,9 @@ export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction
   initialParams = createGetUsersInitialParams();
   flattenPagination = true;
   flattenPaginationMax = 150; // TODO: RC fix
+  static is(action: PaginatedAction): boolean {
+    return !!action['isGetAllUsersAsAdmin'];
+  }
 }
 
 export class GetCFUser extends CFStartAction implements IRequestAction {

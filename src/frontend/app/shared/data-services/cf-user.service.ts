@@ -345,6 +345,19 @@ export class CfUserService {
     return observableOf(this.createPaginationActionFromLevel(isAdmin, cfGuid, orgGuid, spaceGuid));
   }
 
+  // public canFetchAllUsers(isAdmin: boolean, cfGuid: string, orgGuid?: string, spaceGuid?: string): Observable<boolean> {
+  //   if (isAdmin) {
+
+  //   }
+
+  //   return false;
+  //   const action = this.createCfGetUsersAction(cfGuid);
+  //   return this.fetchTotalUsers(cfGuid).pipe(
+  //     first(),
+  //     map(count => count < action.flattenPaginationMax)
+  //   );
+  // }
+
   /**
    * Create a paginated action that will fetch a list of users with respect to the level (cf, org or space)
    * @param isAdmin

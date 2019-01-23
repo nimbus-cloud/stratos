@@ -19,6 +19,7 @@ import { IListConfig, IMultiListAction, ListViewTypes } from '../../list.compone
 import { ListRowSateHelper, ListRowStateSetUpManager } from '../../list.helper';
 import { CfSelectUsersDataSourceService } from './cf-select-users-data-source.service';
 
+// TODO: RC is this needed?
 export class CfSelectUsersListConfigService implements IListConfig<APIResource<CfUser>> {
   viewType = ListViewTypes.TABLE_ONLY;
   dataSource: CfSelectUsersDataSourceService;
@@ -62,15 +63,13 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
       switchMap(cf =>
         combineLatest(
           observableOf(cf),
-          cfUserService.createPaginationAction(cf.global.isAdmin, activeRouteCfOrgSpace.cfGuid, activeRouteCfOrgSpace.orgGuid, activeRouteCfOrgSpace.spaceGuid)
+          cfUserService.createPaginationAction(
+            cf.global.isAdmin,
+            activeRouteCfOrgSpace.cfGuid,
+            activeRouteCfOrgSpace.orgGuid,
+            activeRouteCfOrgSpace.spaceGuid)
         )
       ),
-      // map(cf =>
-      //   [
-      //     cf,
-      //     cfUserService.createPaginationAction(cf.global.isAdmin, activeRouteCfOrgSpace.cfGuid, activeRouteCfOrgSpace.orgGuid, activeRouteCfOrgSpace.spaceGuid)
-      //   ]
-      // ),
       tap(([cf, action]) => this.createDataSource(action)),
       map(([cf]) => cf && cf.state.initialised),
       publishReplay(1),
@@ -132,11 +131,11 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
   getColumns = () => this.columns;
   getGlobalActions = () => [];
   getMultiActions = (): IMultiListAction<APIResource<CfUser>>[] => [
-    {
-      label: 'delete me',
-      description: '',
-      action: (items: APIResource<CfUser>[]) => false
-    }
+    // {
+    //   label: 'delete me',
+    //   description: '',
+    //   action: (items: APIResource<CfUser>[]) => false
+    // }
   ]
   getSingleActions = () => [];
   getMultiFiltersConfigs = () => [];
