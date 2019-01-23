@@ -74,19 +74,29 @@ export class CfUserService {
     )
 
   getUser = (endpointGuid: string, userGuid: string): Observable<any> => {
-    if (!this.users[userGuid]) {
-      this.users[userGuid] = this.entityServiceFactory.create<APIResource<CfUser>>(
-        cfUserSchemaKey,
-        entityFactory(cfUserSchemaKey),
-        userGuid,
-        new GetUser(endpointGuid, userGuid),
-        true
-      ).waitForEntity$.pipe(
-        filter(entity => !!entity),
-        map(entity => entity.entity)
-      );
-    }
-    return this.users[userGuid];
+    // Attempt to get user from all users first, this better covers case when a non-admin can't his /users
+    return this.getUsers(endpointGuid, false).pipe(
+      switchMap(users => {
+        // `users` will be null if we can't handle the fetch (connected as non-admin with lots of orgs). For those case fall back on the
+        // user entity. Why not just use the user entity? There's a lot of these requests.. in parallel if we're fetching a list of users
+        // at the same time
+        if (users) {
+          return observableOf(users.filter(o => o.metadata.guid === userGuid)[0]);
+        }
+        if (!this.users[userGuid]) {
+          this.users[userGuid] = this.entityServiceFactory.create<APIResource<CfUser>>(
+            cfUserSchemaKey,
+            entityFactory(cfUserSchemaKey),
+            userGuid,
+            new GetUser(endpointGuid, userGuid),
+            true
+          ).waitForEntity$.pipe(
+            filter(entity => !!entity),
+            map(entity => entity.entity)
+          );
+        }
+        return this.users[userGuid];
+      }));
   }
 
   private parseOrgRole(user: CfUser,
@@ -244,17 +254,6 @@ export class CfUserService {
   fetchTotalUsers(cfGuid: string, orgGuid?: string, spaceGuid?: string): Observable<number> {
     return this.isConnectedUserAdmin(cfGuid).pipe(
       switchMap(isAdmin => {
-        // // Non-admins at the cf level cannot fetch a list of all users easily (non-admins cannot access /users list)
-        // if (isAdmin || orgGuid || spaceGuid) {
-        //   return this.createPaginationActionFromLevel(isAdmin, cfGuid, orgGuid, spaceGuid, false).pipe(
-        //     switchMap(action => fetchTotalResults(
-        //       action,
-        //       this.store,
-        //       this.paginationMonitorFactory
-        //     ))
-        //   );
-        // }
-        // return observableOf(null);
         // Non-admins at the cf level cannot fetch a list of all users easily (non-admins cannot access /users list)
         return (isAdmin || orgGuid || spaceGuid) ? fetchTotalResults(
           this.createPaginationActionFromLevel(isAdmin, cfGuid, orgGuid, spaceGuid),

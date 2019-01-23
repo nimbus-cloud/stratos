@@ -95,8 +95,9 @@ export class CloudFoundryOrganizationService {
           createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
         ];
         if (!isAdmin) {
-          // We're only interested in fetching org roles via the org request for non-admins. This is the only way to guarantee the roles
-          // are present for all users associated with the org
+          // We're only interested in fetching org roles via the org request for non-admins.
+          // Non-admins cannot fetch missing roles via the users entity as the `<x>_url` is invalid
+          // #2902 Scaling Orgs/Spaces Inline --> individual capped requests & handling
           relations.push(
             createEntityRelationKey(organizationSchemaKey, OrgUserRoleNames.USER),
             createEntityRelationKey(organizationSchemaKey, OrgUserRoleNames.MANAGER),

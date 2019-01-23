@@ -299,6 +299,7 @@ export function fetchTotalResults(
 
   return pagObs.pagination$.pipe(
     filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[1] && !pagination.pageRequests[1].busy),
+    first(),
     map(pag => pag.totalResults)
   );
 }

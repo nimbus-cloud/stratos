@@ -1,14 +1,15 @@
-import { GetSpace } from '../../../actions/space.actions';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
+import { GetOrganization } from '../../../actions/organization.actions';
 import { APIResponse } from '../../../actions/request.actions';
+import { GetSpace } from '../../../actions/space.actions';
 import { AppState, IRequestEntityTypeState } from '../../../app-state';
 import { selectPaginationState } from '../../../selectors/pagination.selectors';
 import { APIResource } from '../../../types/api.types';
 import { IRequestDataState } from '../../../types/entity.types';
 import { PaginatedAction, PaginationEntityState } from '../../../types/pagination.types';
-import { CFStartAction, RequestEntityLocation, WrapperRequestActionSuccess } from '../../../types/request.types';
+import { RequestEntityLocation, WrapperRequestActionSuccess } from '../../../types/request.types';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../../types/user.types';
 import { cfUserSchemaKey, entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../entity-factory';
 import { deepMergeState, mergeEntity } from '../../reducer.helper';
@@ -17,9 +18,9 @@ import {
   ValidateEntityResult,
   ValidateResultFetchingState,
 } from '../entity-relations.types';
-import { GetOrganization } from '../../../actions/organization.actions';
 
 function updateUserFromOrgSpaceArray(
+  apiUsers: IRequestEntityTypeState<APIResource<CfUser>>,
   existingUsers: IRequestEntityTypeState<APIResource<CfUser>>,
   newUsers: IRequestEntityTypeState<APIResource<CfUser>>,
   orgOrSpace,
@@ -27,7 +28,7 @@ function updateUserFromOrgSpaceArray(
   userParamName: string) {
   if (orgOrSpace[orgSpaceParamName]) {
     orgOrSpace[orgSpaceParamName].forEach(userGuid => {
-      const existingUser = existingUsers[userGuid];
+      const existingUser = apiUsers[userGuid] || existingUsers[userGuid];
       const existingRoles = existingUser.entity[userParamName] || [];
 
       if (existingRoles.indexOf(orgOrSpace.guid) < 0) {
@@ -59,18 +60,19 @@ export function orgSpacePostProcess(
   const entities = apiResponse ? apiResponse.response.entities : allEntities;
   const orgOrSpace = entities[action.entityKey][action.guid];
   const users = entities[cfUserSchemaKey];
+  const existingUsers = allEntities[cfUserSchemaKey];
 
   const newUsers = {};
   if (action.entityKey === organizationSchemaKey) {
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, OrgUserRoleNames.USER, CfUserRoleParams.ORGANIZATIONS);
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, OrgUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_ORGS);
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, OrgUserRoleNames.BILLING_MANAGERS,
+    updateUserFromOrgSpaceArray(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.USER, CfUserRoleParams.ORGANIZATIONS);
+    updateUserFromOrgSpaceArray(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_ORGS);
+    updateUserFromOrgSpaceArray(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.BILLING_MANAGERS,
       CfUserRoleParams.BILLING_MANAGER_ORGS);
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, OrgUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_ORGS);
+    updateUserFromOrgSpaceArray(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_ORGS);
   } else if (action.entityKey === spaceSchemaKey) {
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, SpaceUserRoleNames.DEVELOPER, CfUserRoleParams.SPACES);
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, SpaceUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_SPACES);
-    updateUserFromOrgSpaceArray(users, newUsers, orgOrSpace.entity, SpaceUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_SPACES);
+    updateUserFromOrgSpaceArray(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.DEVELOPER, CfUserRoleParams.SPACES);
+    updateUserFromOrgSpaceArray(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_SPACES);
+    updateUserFromOrgSpaceArray(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_SPACES);
   }
 
   if (!Object.keys(newUsers).length) {
