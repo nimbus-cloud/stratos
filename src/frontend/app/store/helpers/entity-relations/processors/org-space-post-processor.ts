@@ -19,7 +19,10 @@ import {
   ValidateResultFetchingState,
 } from '../entity-relations.types';
 
-function updateUserFromOrgSpaceArray(
+/**
+ * Add roles from (org|space)\[role\]\[user\] into user\[role\]
+ */
+function updateUser(
   apiUsers: IRequestEntityTypeState<APIResource<CfUser>>,
   existingUsers: IRequestEntityTypeState<APIResource<CfUser>>,
   newUsers: IRequestEntityTypeState<APIResource<CfUser>>,
@@ -64,15 +67,15 @@ export function orgSpacePostProcess(
 
   const newUsers = {};
   if (action.entityKey === organizationSchemaKey) {
-    updateUserFromOrgSpaceArray(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.USER, CfUserRoleParams.ORGANIZATIONS);
-    updateUserFromOrgSpaceArray(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_ORGS);
-    updateUserFromOrgSpaceArray(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.BILLING_MANAGERS,
+    updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.USER, CfUserRoleParams.ORGANIZATIONS);
+    updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_ORGS);
+    updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.BILLING_MANAGERS,
       CfUserRoleParams.BILLING_MANAGER_ORGS);
-    updateUserFromOrgSpaceArray(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_ORGS);
+    updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_ORGS);
   } else if (action.entityKey === spaceSchemaKey) {
-    updateUserFromOrgSpaceArray(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.DEVELOPER, CfUserRoleParams.SPACES);
-    updateUserFromOrgSpaceArray(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_SPACES);
-    updateUserFromOrgSpaceArray(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_SPACES);
+    updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.DEVELOPER, CfUserRoleParams.SPACES);
+    updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_SPACES);
+    updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_SPACES);
   }
 
   if (!Object.keys(newUsers).length) {

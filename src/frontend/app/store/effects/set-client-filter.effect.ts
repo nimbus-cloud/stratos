@@ -19,7 +19,6 @@ export class SetClientFilterEffect {
   @Effect({ dispatch: false }) clearPageNumber$ = this.actions$.ofType<SetClientFilter>(SET_CLIENT_FILTER).pipe(
     map(action => {
       // We reset the page when a param is changed.
-      console.log('2');
       this.store.dispatch(new SetClientPage(action.entityKey, action.paginationKey, 1));
     }));
 }

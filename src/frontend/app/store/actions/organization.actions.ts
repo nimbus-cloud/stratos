@@ -190,7 +190,7 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
     'order-direction-field': 'username',
   };
   flattenPagination = true;
-  flattenPaginationMax = 150; // TODO: RC
+  flattenPaginationMax = 1500; // TODO: RC
   skipValidation: boolean;
   populateMissing: boolean;
 }
