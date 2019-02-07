@@ -17,6 +17,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"syscall"
 	"time"
@@ -793,6 +794,35 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		e.SetHTTPErrorHandler(getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler))
 		log.Info("Serving static UI resources")
 	}
+}
+
+func (p *portalProxy) AddLoginHook(priority int, function interfaces.LoginHookFunc) error {
+	log.Info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!AddLoginHook")
+	log.Info(priority)
+	p.GetConfig().LoginHooks = append(p.GetConfig().LoginHooks, interfaces.LoginHook{
+		Priority: priority,
+		Function: function,
+	})
+	return nil
+}
+
+func (p *portalProxy) ExecuteLoginHooks(c echo.Context) error {
+	log.Info("ExecuteLoginHooks")
+	hooks := p.GetConfig().LoginHooks
+	sort.SliceStable(hooks, func(i, j int) bool {
+		return hooks[i].Priority < hooks[j].Priority
+	})
+
+	for _, hook := range hooks {
+		log.Info("ExecuteLoginHooks order")
+		log.Info(hook.Priority)
+		err := hook.Function(c)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // Custom error handler to let Angular app handle application URLs (catches non-backend 404 errors)

@@ -5,6 +5,7 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
+	log "github.com/sirupsen/logrus"
 	//log "github.com/sirupsen/logrus"
 )
 
@@ -70,5 +71,21 @@ func (userinvite *UserInvite) Init() error {
 	}
 
 	userinvite.portalProxy.GetConfig().PluginConfig[UserInvitePluginConfigSetting] = "true"
+	userinvite.portalProxy.AddLoginHook(5, userinvite.iLoginHook)
+	// log.Info("1")
+	// userinvite.portalProxy.GetConfig().LoginHook = userinvite.createLoginHook(userinvite.portalProxy.GetConfig().LoginHook)
+	// log.Info("2")
+	return nil
+}
+
+// func (userinvite *UserInvite) createLoginHook(originalLoginHook func(echo.Context) error) func(echo.Context) error {
+// 	log.Info("3")
+// 	return func(context echo.Context) error {
+// 		log.Info("5")
+// 		return originalLoginHook(context)
+// 	}
+// }
+func (c *UserInvite) iLoginHook(context echo.Context) error {
+	log.Info("iLoginHook")
 	return nil
 }

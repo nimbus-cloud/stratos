@@ -31,6 +31,12 @@ type TemplateConfig struct {
 	Subject           string `configName:"INVITE_USER_SUBJECT"`
 }
 
+// UAA Client details used to create uaa & cf user
+type ClientConfig struct {
+	ID          string `configName:"INVITE_USER_CLIENT_ID"`
+	Secret      string `configName:"INVITE_USER_CLIENT_SECRET"`
+}
+
 // Config represents the configuration required
 type Config struct {
 	SMTP              *SMTPConfig
@@ -38,6 +44,7 @@ type Config struct {
 	PlainTextTemplate *text.Template
 	HTMLTemplate      *html.Template
 	SubjectTemplate   *text.Template
+	Client            *ClientConfig
 }
 
 const (
