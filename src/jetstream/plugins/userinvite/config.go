@@ -33,8 +33,8 @@ type TemplateConfig struct {
 
 // UAA Client details used to create uaa & cf user
 type ClientConfig struct {
-	ID          string `configName:"INVITE_USER_CLIENT_ID"`
-	Secret      string `configName:"INVITE_USER_CLIENT_SECRET"`
+	ID     string `configName:"INVITE_USER_CLIENT_ID"`
+	Secret string `configName:"INVITE_USER_CLIENT_SECRET"`
 }
 
 // Config represents the configuration required
@@ -69,8 +69,14 @@ func (userinvite *UserInvite) LoadConfig() (*Config, error) {
 		return c, fmt.Errorf("Unable to load Template configuration. %v", err)
 	}
 
+	clientConfig := &ClientConfig{}
+	if err := config.Load(clientConfig); err != nil {
+		return c, fmt.Errorf("Unable to load invite client configuration. %v", err)
+	}
+
 	c.SMTP = smtpConfig
 	c.TemplateConfig = templateConfig
+	c.Client = clientConfig
 
 	if c.SMTP.Port == 0 {
 		c.SMTP.Port = defaultSMTPPort

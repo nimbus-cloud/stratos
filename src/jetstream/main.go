@@ -819,8 +819,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 }
 
 func (p *portalProxy) AddLoginHook(priority int, function interfaces.LoginHookFunc) error {
-	log.Info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!AddLoginHook")
-	log.Info(priority)
 	p.GetConfig().LoginHooks = append(p.GetConfig().LoginHooks, interfaces.LoginHook{
 		Priority: priority,
 		Function: function,
@@ -835,15 +833,20 @@ func (p *portalProxy) ExecuteLoginHooks(c echo.Context) error {
 		return hooks[i].Priority < hooks[j].Priority
 	})
 
+	erred := false
 	for _, hook := range hooks {
 		log.Info("ExecuteLoginHooks order")
 		log.Info(hook.Priority)
 		err := hook.Function(c)
 		if err != nil {
-			return err
+			erred = true
+			log.Errorf("Failed to execute log in hook: %v", err)
 		}
 	}
 
+	if erred {
+		return fmt.Errorf("Failed to execute one or more login hooks")
+	}
 	return nil
 }
 
@@ -867,7 +870,7 @@ func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPError
 	}
 }
 
-// EchoV2DefaultHTTPErrorHandler ensurews we get V2 error behaviour
+// EchoV2DefaultHTTPErrorHandler ensures we get V2 error behaviour
 // i.e. no wrapping in 'message' JSON object
 func echoV2DefaultHTTPErrorHandler(err error, c echo.Context) {
 	code := http.StatusInternalServerError

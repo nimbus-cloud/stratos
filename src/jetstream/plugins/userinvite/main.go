@@ -2,6 +2,7 @@ package userinvite
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
@@ -74,10 +75,7 @@ func (userinvite *UserInvite) Init() error {
 	}
 
 	userinvite.portalProxy.GetConfig().PluginConfig[UserInvitePluginConfigSetting] = "true"
-	userinvite.portalProxy.AddLoginHook(5, userinvite.iLoginHook)
-	// log.Info("1")
-	// userinvite.portalProxy.GetConfig().LoginHook = userinvite.createLoginHook(userinvite.portalProxy.GetConfig().LoginHook)
-	// log.Info("2")
+	userinvite.portalProxy.AddLoginHook(5, userinvite.initClientToken)
 	userinvite.portalProxy.AddAuthProvider(UAAClientAuthType, interfaces.AuthProvider{
 		Handler:  userinvite.doUAAClientAuthFlow,
 		UserInfo: userinvite.getCNSIUserFromUAAClientToken,
@@ -86,17 +84,35 @@ func (userinvite *UserInvite) Init() error {
 	return nil
 }
 
-// func (userinvite *UserInvite) createLoginHook(originalLoginHook func(echo.Context) error) func(echo.Context) error {
-// 	log.Info("3")
-// 	return func(context echo.Context) error {
-// 		log.Info("5")
-// 		return originalLoginHook(context)
-// 	}
-// }
-func (c *UserInvite) iLoginHook(context echo.Context) error {
-	// Get client id and client secret from config
+func (userinvite *UserInvite) initClientToken(context echo.Context) error {
+	// Do we have a valid cf guid?
+	if userinvite.portalProxy.GetConfig().CloudFoundryInfo == nil || len(userinvite.portalProxy.GetConfig().CloudFoundryInfo.EndpointGUID) == 0 {
+		return nil
+	}
+	log.Warn("initClientToken 2")
+	cfGuid := userinvite.portalProxy.GetConfig().CloudFoundryInfo.EndpointGUID
 
-	// Attempt to use them to create token
-	log.Info("iLoginHook")
+	// Is the client token already initialised?
+	_, ok := userinvite.portalProxy.GetCNSITokenRecord(cfGuid, UserInviteUserID)
+	if ok {
+		// Already configured
+		return nil
+	}
+
+	// Do we have the required config?
+	if userinvite.Config.Client == nil ||
+		len(userinvite.Config.Client.ID) == 0 ||
+		len(userinvite.Config.Client.Secret) == 0 {
+		return nil
+	}
+
+	// Attempt to use config values to create token
+	_, _, err := userinvite.RefreshToken(cfGuid, userinvite.Config.Client.ID, userinvite.Config.Client.Secret)
+
+	if err != nil {
+		return fmt.Errorf("Failed to verify invite client id and secret: %v", err)
+	}
+
+	log.Info("Invite User UAA client initialized")
 	return nil
 }

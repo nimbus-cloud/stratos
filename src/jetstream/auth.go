@@ -255,7 +255,7 @@ func (p *portalProxy) doLoginToUAA(c echo.Context) (*interfaces.LoginRes, error)
 
 	err = p.ExecuteLoginHooks(c)
 	if err != nil {
-		log.Warn("Login hook failed", err)
+		log.Warnf("Login hook failed: %v", err)
 	}
 
 	uaaAdmin := strings.Contains(uaaRes.Scope, p.Config.ConsoleConfig.ConsoleAdminScope)
