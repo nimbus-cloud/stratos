@@ -331,61 +331,56 @@ function transformMetricData(source, interval, startTime, endTime, trigger) {
 }
 
 function getColor(trigger, value) {
+  let color = normalColor;
   if (!isNaN(value)) {
     for (let i = 0; trigger.upper && trigger.upper.length > 0 && i < trigger.upper.length; i++) {
       if (trigger.upper[i].operator === '>=' && value >= trigger.upper[i].threshold) {
-        return trigger.upper[i].color;
+        color = trigger.upper[i].color;
+        break;
       }
       if (trigger.upper[i].operator === '>' && value > trigger.upper[i].threshold) {
-        return trigger.upper[i].color;
+        color = trigger.upper[i].color;
+        break;
       }
     }
     for (let i = 0; trigger.lower && trigger.lower.length > 0 && i < trigger.lower.length; i++) {
       const index = trigger.lower.length - 1 - i;
       if (trigger.lower[index].operator === '<=' && value <= trigger.lower[index].threshold) {
-        return trigger.lower[index].color;
+        color = trigger.lower[index].color;
+        break;
       }
       if (trigger.lower[index].operator === '<' && value < trigger.lower[index].threshold) {
-        return trigger.lower[index].color;
+        color = trigger.lower[index].color;
+        break;
       }
     }
   }
-  return normalColor;
+  return color;
 }
 
 function getMetricBasicInfo(metricName, source, trigger) {
   const map = {};
   let interval = metricMap[metricName]['interval'];
   let maxCount = 0;
-  const preTimestampMap = {};
-  let maxIndex = -1;
+  let preTimestamp = 0;
   let maxValue = -1;
   for (let i = 0; i < source.length; i++) {
     maxValue = parseInt(source[i].value, 10) > maxValue ? parseInt(source[i].value, 10) : maxValue;
     const thisTimestamp = Math.round(parseInt(source[i].timestamp, 10) / S2NS);
-    const thisIndex = source[i].instance_index ? source[i].instance_index : 0;
-    if (preTimestampMap[thisIndex] === undefined) {
-      if (thisIndex > maxIndex) {
-        maxIndex = thisIndex;
-      }
-      preTimestampMap[thisIndex] = thisTimestamp;
+    const currentInterval = thisTimestamp - preTimestamp;
+    if (map[currentInterval] === undefined) {
+      map[currentInterval] = 1;
     } else {
-      const currentInterval = thisTimestamp - preTimestampMap[thisIndex];
-      if (map[currentInterval] === undefined) {
-        map[currentInterval] = 1;
-      } else {
-        map[currentInterval]++;
-      }
-      if (map[currentInterval] > maxCount) {
-        interval = currentInterval;
-        maxCount = map[currentInterval];
-      }
-      preTimestampMap[thisIndex] = thisTimestamp;
+      map[currentInterval]++;
     }
+    if (map[currentInterval] > maxCount) {
+      interval = currentInterval;
+      maxCount = map[currentInterval];
+    }
+    preTimestamp = thisTimestamp;
   }
   return {
     interval: interval,
-    maxIndex: maxIndex,
     unit: source[0].unit,
     maxValue: maxValue,
     chartMaxValue: getChartMax(trigger, maxValue)
@@ -393,9 +388,7 @@ function getMetricBasicInfo(metricName, source, trigger) {
 }
 
 function getChartMax(trigger, maxValue) {
-  let upperThresholdCount = 0;
-  let lowerThresholdCount = 0;
-  let maxThreshold = 0;
+  let upperThresholdCount, lowerThresholdCount, maxThreshold, thresholdmax = 0;
   if (trigger.upper && trigger.upper.length > 0) {
     upperThresholdCount = trigger.upper.length;
     maxThreshold = trigger.upper[0].threshold;
@@ -404,7 +397,6 @@ function getChartMax(trigger, maxValue) {
     lowerThresholdCount = trigger.lower.length;
     maxThreshold = trigger.lower[0].threshold > maxThreshold ? trigger.lower[0].threshold : maxThreshold;
   }
-  let thresholdmax = 0;
   if (maxThreshold > 0) {
     const thresholdCount = upperThresholdCount + lowerThresholdCount;
     thresholdmax = Math.ceil(maxThreshold * (thresholdCount + 1) / (thresholdCount));
