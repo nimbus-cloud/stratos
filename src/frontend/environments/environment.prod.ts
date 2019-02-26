@@ -6,6 +6,7 @@ export const environment = {
   logLevel: LogLevel.WARN,
   proxyAPIVersion: 'v1',
   cfAPIVersion: 'v2',
+  autoscalerAPIVersion: 'v1',
   logToConsole: true,
   logEnableConsoleActions: false,
   showObsDebug: false,

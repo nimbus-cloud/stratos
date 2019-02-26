@@ -16,6 +16,7 @@ import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monit
 import { AppMetadataTypes, GetAppStatsAction, GetAppSummaryAction } from '../../store/actions/app-metadata.actions';
 import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../store/actions/application.actions';
 import { GetSpace } from '../../store/actions/space.actions';
+import { GetAppAutoscalerHealthAction } from '../../store/actions/app-autoscaler.actions';
 import { AppState } from '../../store/app-state';
 import {
   applicationSchemaKey,
@@ -30,6 +31,7 @@ import {
   spaceWithOrgKey,
   stackSchemaKey,
   appEnvVarsSchemaKey,
+  appAutoscalerHealthSchemaKey,
 } from '../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../store/helpers/entity-relations/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';
@@ -38,6 +40,7 @@ import { endpointEntitiesSelector } from '../../store/selectors/endpoint.selecto
 import { APIResource, EntityInfo } from '../../store/types/api.types';
 import { AppStat } from '../../store/types/app-metadata.types';
 import { PaginationEntityState } from '../../store/types/pagination.types';
+import { AppAutoscalerHealth } from '../../store/types/app-autoscaler.types';
 import {
   getCurrentPageRequestInfo,
   getPaginationObservables,
@@ -77,6 +80,7 @@ export class ApplicationService {
 
   private appEntityService: EntityService<APIResource<IApp>>;
   private appSummaryEntityService: EntityService<APIResource<IAppSummary>>;
+  private appAutoscalerHealthService: EntityService;
 
   constructor(
     @Inject(CF_GUID) public cfGuid: string,
@@ -100,6 +104,14 @@ export class ApplicationService {
       entityFactory(appSummarySchemaKey),
       appGuid,
       new GetAppSummaryAction(appGuid, cfGuid),
+      false
+    );
+
+    this.appAutoscalerHealthService = this.entityServiceFactory.create<APIResource<AppAutoscalerHealth>>(
+      appAutoscalerHealthSchemaKey,
+      entityFactory(appAutoscalerHealthSchemaKey),
+      appGuid,
+      new GetAppAutoscalerHealthAction(appGuid, cfGuid),
       false
     );
 
@@ -135,6 +147,8 @@ export class ApplicationService {
   applicationState$: Observable<ApplicationStateData>;
   applicationUrl$: Observable<string>;
   applicationRunning$: Observable<boolean>;
+
+  waitForAppAutoscalerHealth$: Observable<EntityInfo<AppAutoscalerHealth>>;
 
   /**
    * Fetch the current state of the app (given it's instances) as an object ready
@@ -213,6 +227,8 @@ export class ApplicationService {
     );
 
     this.appEnvVars = this.appEnvVarsService.createEnvVarsObs(this.appGuid, this.cfGuid);
+
+    this.waitForAppAutoscalerHealth$ = this.appAutoscalerHealthService.waitForEntity$.pipe(publishReplay(1), refCount());
   }
 
   public getApplicationEnvVarsMonitor() {
