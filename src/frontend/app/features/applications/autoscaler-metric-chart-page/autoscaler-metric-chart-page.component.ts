@@ -170,17 +170,8 @@ export class AutoscalerMetricChartPageComponent implements OnInit, OnDestroy {
   getLegend(trigger) {
     const legendValue = [];
     const legendColor = [];
-    for (let i = 0; trigger.upper && trigger.upper.length > 0 && i < trigger.upper.length; i++) {
-      const current = trigger.upper[i];
-      const name = `${current.adjustment} if ${current.metric_type} ${current.operator} ${current.threshold}`;
-      legendValue.push({
-        name,
-        value: 1
-      });
-      legendColor.push({
-        name,
-        value: current.color
-      });
+    if (trigger.upper) {
+      this.buildSingleLegend(legendValue, legendColor, trigger.upper);
     }
     legendValue.push({
       name: 'ideal state',
@@ -190,9 +181,18 @@ export class AutoscalerMetricChartPageComponent implements OnInit, OnDestroy {
       name: 'ideal state',
       value: normalColor
     });
+    if (trigger.lower) {
+      this.buildSingleLegend(legendValue, legendColor, trigger.lower);
+    }
+    return {
+      legendValue,
+      legendColor
+    };
+  }
 
-    for (let i = 0; trigger.lower && trigger.lower.length > 0 && i < trigger.lower.length; i++) {
-      const current = trigger.lower[i];
+  buildSingleLegend(legendValue, legendColor, ul) {
+    for (let i = 0; i < ul.length; i++) {
+      const current = ul[i];
       const name = `${current.adjustment} if ${current.metric_type} ${current.operator} ${current.threshold}`;
       legendValue.push({
         name,
@@ -203,10 +203,6 @@ export class AutoscalerMetricChartPageComponent implements OnInit, OnDestroy {
         value: current.color
       });
     }
-    return {
-      legendValue,
-      legendColor
-    };
   }
 
 }

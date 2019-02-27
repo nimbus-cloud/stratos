@@ -1,3 +1,4 @@
+// import * as moment from 'moment';
 import moment from 'moment-timezone';
 
 export const PolicyDefaultSetting = {
@@ -14,31 +15,19 @@ export const MomentFormateTimeS = 'HH:mm:ss';
 
 export const metricMap = {
   memoryused: {
-    unit: 'metric_unit_mb',
     unit_internal: 'MB',
-    type: 'value',
-    type_string: 'metric_type_memoryused',
     interval: 15,
   },
   memoryutil: {
-    unit: 'metric_unit_percentage',
     unit_internal: 'percent',
-    type: 'percentage',
-    type_string: 'metric_type_memoryutil',
     interval: 15,
   },
   responsetime: {
-    unit: 'metric_unit_ms',
     unit_internal: 'ms',
-    type: 'value',
-    type_string: 'metric_type_responsetime',
     interval: 30,
   },
   throughput: {
-    unit: 'metric_unit_rps',
     unit_internal: 'RPS',
-    type: 'value',
-    type_string: 'metric_type_throughput',
     interval: 30,
   }
 };
@@ -204,22 +193,16 @@ function deleteIf(fatherEntity, childName, condition) {
   }
 }
 
-export function buildMetricData(metricName, data, startTime, endTime, skipFormat, trigger) {
-  const result = {
+function initMeticData(metricName) {
+  return {
     latest: {
       target: [{
         name: metricName,
-        value: 0
-      }, {
-        name: '',
         value: 0
       }],
       colorTarget: [
         {
           name: metricName,
-          value: 'rgba(0,0,0,0.2)'
-        }, {
-          name: '',
           value: 'rgba(0,0,0,0.2)'
         }
       ]
@@ -229,72 +212,68 @@ export function buildMetricData(metricName, data, startTime, endTime, skipFormat
       colorTarget: []
     },
     unit: '',
-    maxValue: 0,
     chartMaxValue: 0,
-  };
+  }
+}
+
+export function buildMetricData(metricName, data, startTime, endTime, skipFormat, trigger) {
+  const result = initMeticData(metricName);
   if (data.resources.length > 0) {
     const basicInfo = getMetricBasicInfo(metricName, data.resources, trigger);
     result.unit = basicInfo.unit;
-    result.maxValue = basicInfo.maxValue;
     result.chartMaxValue = basicInfo.chartMaxValue;
     if (!skipFormat) {
-      const transformed = transformMetricData(data.resources, basicInfo.interval, startTime, endTime, trigger);
+      startTime = Math.round(startTime / S2NS);
+      endTime = Math.round(endTime / S2NS);
+      const target = transformMetricData(data.resources, basicInfo.interval, startTime, endTime, trigger);
+      const colorTarget = buildMetricColorData(target, trigger);
       result.formated = {
-        target: transformed['target'],
-        colorTarget: transformed['colorTarget']
+        target: target,
+        colorTarget
       };
     }
-    result.latest = {
-      target: [{
-        name: metricName,
-        value: data.resources[data.resources.length - 1].value
-      }, {
-        name: '',
-        value: basicInfo.chartMaxValue - data.resources[data.resources.length - 1].value
-      }],
-      colorTarget: [
-        {
-          name: metricName,
-          value: getColor(trigger, data.resources[data.resources.length - 1].value)
-        }, {
-          name: '',
-          value: 'rgba(0,0,0,0.2)'
-        }
-      ]
-    };
+    result.latest.target = [{
+      name: metricName,
+      value: data.resources[data.resources.length - 1].value
+    }];
+    result.latest.colorTarget = buildMetricColorData(result.latest.target, trigger);
   }
   return result;
 }
 
+export function insertEmptyMetrics(data, startTime, endTime, interval) {
+  const insertEmptyNumber = Math.floor((endTime - startTime) / interval) + 1; 
+  for (let i = 0; i < insertEmptyNumber; i ++) {
+    const emptyMetric = buildSingleMetricData(startTime + i * interval, 0);
+    if (interval < 0) {
+      data.unshift(emptyMetric);
+    } else {
+      data.push(emptyMetric)
+    }
+  }
+  return data;
+}
+
+function buildSingleMetricData(timestamp, value) {
+  return {
+    time: timestamp,
+    name: moment(timestamp * 1000).format(MomentFormateTimeS),
+    value
+  }
+}
+
 function transformMetricData(source, interval, startTime, endTime, trigger) {
-  startTime = Math.round(startTime / S2NS);
-  endTime = Math.round(endTime / S2NS);
   if (source.length === 0) {
     return [];
   }
   const scope = Math.round(interval / 2);
   const target = [];
   let targetTimestamp = Math.round(source[0].timestamp / S2NS);
-  let targetIndex = 0;
-
-  const insertEmptyNumber = Math.floor((targetTimestamp - startTime) / interval);
-  const startTimestamp = targetTimestamp - insertEmptyNumber * interval;
-  for (; targetIndex < insertEmptyNumber; targetIndex++) {
-    target[targetIndex] = {
-      time: startTimestamp + targetIndex * interval,
-      name: moment((startTimestamp + targetIndex * interval) * 1000).format(MomentFormateTimeS),
-      value: 0
-    };
-  }
-
+  let targetIndex = insertEmptyMetrics(target, targetTimestamp - interval, startTime, -interval).length
   let sourceIndex = 0;
   while (sourceIndex < source.length) {
     if (!target[targetIndex]) {
-      target[targetIndex] = {
-        time: targetTimestamp,
-        name: moment(targetTimestamp * 1000).format(MomentFormateTimeS),
-        value: 0
-      };
+      target[targetIndex] = buildSingleMetricData(targetTimestamp, 0);
     }
     const metric = source[sourceIndex];
     const sourceTimestamp = Math.round(metric.timestamp / S2NS);
@@ -308,26 +287,18 @@ function transformMetricData(source, interval, startTime, endTime, trigger) {
       sourceIndex++;
     }
   }
-  let currentLatestTime = target[targetIndex].time + interval;
-  while (currentLatestTime < endTime) {
-    target.push({
-      time: currentLatestTime,
-      name: moment(currentLatestTime * 1000).format(MomentFormateTimeS),
-      value: 0
-    });
-    currentLatestTime = currentLatestTime + interval;
-  }
+  return insertEmptyMetrics(target, target[targetIndex].time + interval, endTime, interval);
+}
+
+function buildMetricColorData(metricData, trigger) {
   const colorTarget = [];
-  target.map((cell) => {
+  metricData.map((item) => {
     colorTarget.push({
-      name: cell.name,
-      value: getColor(trigger, cell.value),
+      name: item.name,
+      value: getColor(trigger, item.value),
     });
   });
-  return {
-    target,
-    colorTarget
-  };
+  return colorTarget;
 }
 
 function getColor(trigger, value) {
@@ -361,8 +332,7 @@ function getColor(trigger, value) {
 function getMetricBasicInfo(metricName, source, trigger) {
   const map = {};
   let interval = metricMap[metricName]['interval'];
-  let maxCount = 0;
-  let preTimestamp = 0;
+  let maxCount, preTimestamp = 0;
   let maxValue = -1;
   for (let i = 0; i < source.length; i++) {
     maxValue = parseInt(source[i].value, 10) > maxValue ? parseInt(source[i].value, 10) : maxValue;
@@ -382,23 +352,21 @@ function getMetricBasicInfo(metricName, source, trigger) {
   return {
     interval: interval,
     unit: source[0].unit,
-    maxValue: maxValue,
     chartMaxValue: getChartMax(trigger, maxValue)
   };
 }
 
 function getChartMax(trigger, maxValue) {
-  let upperThresholdCount, lowerThresholdCount, maxThreshold, thresholdmax = 0;
+  let thresholdCount, maxThreshold, thresholdmax = 0;
   if (trigger.upper && trigger.upper.length > 0) {
-    upperThresholdCount = trigger.upper.length;
+    thresholdCount += trigger.upper.length;
     maxThreshold = trigger.upper[0].threshold;
   }
   if (trigger.lower && trigger.lower.length > 0) {
-    lowerThresholdCount = trigger.lower.length;
+    thresholdCount += trigger.lower.length;
     maxThreshold = trigger.lower[0].threshold > maxThreshold ? trigger.lower[0].threshold : maxThreshold;
   }
   if (maxThreshold > 0) {
-    const thresholdCount = upperThresholdCount + lowerThresholdCount;
     thresholdmax = Math.ceil(maxThreshold * (thresholdCount + 1) / (thresholdCount));
   }
   thresholdmax = maxValue > thresholdmax ? maxValue : thresholdmax;
