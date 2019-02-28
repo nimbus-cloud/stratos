@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { TableCellAutoscalerEventTimestampComponent } from './table-cell-autoscaler-event-timestamp.component';
-import { EntityInfo } from '../../../../../../store/types/api.types';
 
 describe('TableCellAutoscalerEventTimestampComponent', () => {
   let component: TableCellAutoscalerEventTimestampComponent<EntityInfo>;
