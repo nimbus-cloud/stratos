@@ -35,6 +35,11 @@ export const userProfileSchemaKey = 'userProfile';
 export const servicePlanVisibilitySchemaKey = 'servicePlanVisibility';
 export const serviceBrokerSchemaKey = 'serviceBroker';
 export const userFavoritesSchemaKey = 'userFavorites';
+export const appAutoscalerHealthSchemaKey = 'autoscalerHealth';
+export const appAutoscalerPolicySchemaKey = 'autoscalerPolicy';
+export const appAutoscalerScalingHistorySchemaKey = 'autoscalerScalingHistory';
+export const appAutoscalerAppMetricSchemaKey = 'autoscalerAppMetric';
+export const appAutoscalerInsMetricSchemaKey = 'autoscalerInsMetric';
 
 export const spaceWithOrgKey = 'spaceWithOrg';
 export const serviceInstancesWithSpaceSchemaKey = 'serviceInstancesWithSpace';
@@ -313,6 +318,21 @@ entityCache[servicePlanVisibilitySchemaKey] = ServicePlanVisibilitySchema;
 
 const UserFavoritesSchemaKey = new EntitySchema(userFavoritesSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[userFavoritesSchemaKey] = UserFavoritesSchemaKey;
+
+const AppAutoscalerPolicySchema = new EntitySchema(appAutoscalerPolicySchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[appAutoscalerPolicySchemaKey] = AppAutoscalerPolicySchema;
+
+const AppAutoscalerHealthSchema = new EntitySchema(appAutoscalerHealthSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[appAutoscalerHealthSchemaKey] = AppAutoscalerHealthSchema;
+
+const AppAutoscalerScalingHistorySchema = new EntitySchema(appAutoscalerScalingHistorySchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[appAutoscalerScalingHistorySchemaKey] = AppAutoscalerScalingHistorySchema;
+
+const AppAutoscalerAppMetricSchema = new EntitySchema(appAutoscalerAppMetricSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[appAutoscalerAppMetricSchemaKey] = AppAutoscalerAppMetricSchema;
+
+const AppAutoscalerInsMetricSchema = new EntitySchema(appAutoscalerInsMetricSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[appAutoscalerInsMetricSchemaKey] = AppAutoscalerInsMetricSchema;
 
 const ApplicationEntitySchema = new EntitySchema(
   applicationSchemaKey,
