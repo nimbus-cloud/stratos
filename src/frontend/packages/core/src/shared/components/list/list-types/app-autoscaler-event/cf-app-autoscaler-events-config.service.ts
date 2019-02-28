@@ -1,24 +1,35 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
-import { ApplicationService } from '../../../../../features/applications/application.service';
-import { AppState } from '../../../../../store/app-state';
-import { EntityInfo } from '../../../../../store/types/api.types';
-import { ITableColumn } from '../../list-table/table.types';
-import { IListConfig, ListConfig, ListViewTypes, IListMultiFilterConfig } from '../../list.component.types';
-import { CfAppAutoscalerEventsDataSource } from './cf-app-autoscaler-events-data-source';
-import { TableCellAutoscalerEventActionComponent } from './table-cell-autoscaler-event-action/table-cell-autoscaler-event-action.component';
-import {
-  TableCellAutoscalerEventTimestampComponent
-} from './table-cell-autoscaler-event-timestamp/table-cell-autoscaler-event-timestamp.component';
-import { TableCellAutoscalerEventTypeComponent } from './table-cell-autoscaler-event-type/table-cell-autoscaler-event-type.component';
-import { TableCellAutoscalerEventStatusComponent } from './table-cell-autoscaler-event-status/table-cell-autoscaler-event-status.component';
-import { TableCellAutoscalerEventChangeComponent } from './table-cell-autoscaler-event-change/table-cell-autoscaler-event-change.component';
-import { TableCellAutoscalerEventErrorComponent } from './table-cell-autoscaler-event-error/table-cell-autoscaler-event-error.component';
-import { PaginatedAction } from '../../../../../store/types/pagination.types';
-import { selectPaginationState } from '../../../../../store/selectors/pagination.selectors';
 import { filter, first } from 'rxjs/operators';
-import { SetClientFilter } from '../../../../../store/actions/pagination.actions';
+
+import { SetClientFilter } from '../../../../../../../store/src/actions/pagination.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { selectPaginationState } from '../../../../../../../store/src/selectors/pagination.selectors';
+import { EntityInfo } from '../../../../../../../store/src/types/api.types';
+import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { ApplicationService } from '../../../../../features/applications/application.service';
+import { ITableColumn } from '../../list-table/table.types';
+import { IListConfig, IListMultiFilterConfig, ListConfig, ListViewTypes } from '../../list.component.types';
+import { CfAppAutoscalerEventsDataSource } from './cf-app-autoscaler-events-data-source';
+import {
+  TableCellAutoscalerEventActionComponent,
+} from './table-cell-autoscaler-event-action/table-cell-autoscaler-event-action.component';
+import {
+  TableCellAutoscalerEventChangeComponent,
+} from './table-cell-autoscaler-event-change/table-cell-autoscaler-event-change.component';
+import {
+  TableCellAutoscalerEventErrorComponent,
+} from './table-cell-autoscaler-event-error/table-cell-autoscaler-event-error.component';
+import {
+  TableCellAutoscalerEventStatusComponent,
+} from './table-cell-autoscaler-event-status/table-cell-autoscaler-event-status.component';
+import {
+  TableCellAutoscalerEventTimestampComponent,
+} from './table-cell-autoscaler-event-timestamp/table-cell-autoscaler-event-timestamp.component';
+import {
+  TableCellAutoscalerEventTypeComponent,
+} from './table-cell-autoscaler-event-type/table-cell-autoscaler-event-type.component';
 
 @Injectable()
 export class CfAppAutoscalerEventsConfigService extends ListConfig<EntityInfo> implements IListConfig<EntityInfo> {

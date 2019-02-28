@@ -3,8 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import { GetAppAutoscalerHealthAction } from '../../../../../app/store/actions/app-autoscaler.actions';
-import { AppAutoscalerHealth } from '../../../../../app/store/types/app-autoscaler.types';
+import { GetAppAutoscalerHealthAction } from '../../../../store/src/actions/app-autoscaler.actions';
 import {
   AppMetadataTypes,
   GetAppStatsAction,
@@ -42,6 +41,7 @@ import {
 import { selectEntity, selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
 import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
+import { AppAutoscalerHealth } from '../../../../store/src/types/app-autoscaler.types';
 import { AppStat } from '../../../../store/src/types/app-metadata.types';
 import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import { IApp, IAppSummary, IOrganization, ISpace } from '../../core/cf-api.types';

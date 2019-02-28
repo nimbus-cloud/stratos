@@ -60,9 +60,11 @@
     "@ngrx/store": "^7.2.0",
     "@ngrx/store-devtools": "^7.2.0",
     "@swimlane/ngx-charts": "^10.1.0",
+    "@types/moment-timezone": "^0.5.10",
     "angular2-virtual-scroll": "^0.3.1",
     "core-js": "^2.6.5",
     "hammerjs": "^2.0.8",
+    "lodash-es": "^4.17.11",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.23",
     "ngx-moment": "^3.3.0",
@@ -75,8 +77,7 @@
     "ts-md5": "^1.2.4",
     "web-animations-js": "^2.3.1",
     "xterm": "^3.5.0",
-    "zone.js": "~0.8.26",
-    "lodash-es": "^4.17.11"
+    "zone.js": "~0.8.26"
   },
   "engines": {
     "node": "8.11.2"

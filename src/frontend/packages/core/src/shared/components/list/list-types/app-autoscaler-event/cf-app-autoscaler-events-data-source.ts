@@ -1,12 +1,12 @@
 import { Store } from '@ngrx/store';
-import { GetAppAutoscalerScalingHistoryAction } from '../../../../../store/actions/app-autoscaler.actions';
-import { AddParams, RemoveParams } from '../../../../../store/actions/pagination.actions';
-import { AppState } from '../../../../../store/app-state';
-import { EntityInfo } from '../../../../../store/types/api.types';
-import { PaginationEntityState, QParam } from '../../../../../store/types/pagination.types';
+
+import { GetAppAutoscalerScalingHistoryAction } from '../../../../../../../store/src/actions/app-autoscaler.actions';
+import { AddParams, RemoveParams } from '../../../../../../../store/src/actions/pagination.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { appAutoscalerScalingHistorySchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
+import { EntityInfo } from '../../../../../../../store/src/types/api.types';
+import { PaginationEntityState, QParam } from '../../../../../../../store/src/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { entityFactory } from '../../../../../store/helpers/entity-factory';
-import { appAutoscalerScalingHistorySchemaKey } from '../../../../../store/helpers/entity-factory';
 
 export class CfAppAutoscalerEventsDataSource extends ListDataSource<EntityInfo> {
   action: any;

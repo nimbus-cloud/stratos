@@ -1,10 +1,10 @@
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 
-import { AppAutoscalerHealth, AppAutoscalerPolicy } from '../../../app/store/types/app-autoscaler.types';
 import { AppState } from '../../store/src/app-state';
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../../store/src/types/api.types';
+import { AppAutoscalerHealth, AppAutoscalerPolicy } from '../../store/src/types/app-autoscaler.types';
 import { AppStat } from '../../store/src/types/app-metadata.types';
 import { IApp, IAppSummary, ISpace } from '../src/core/cf-api.types';
 import { EntityServiceFactory } from '../src/core/entity-service-factory.service';

@@ -1,31 +1,35 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Http } from '@angular/http';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
+import {
+  ErrorStateMatcher,
+  MatSnackBar,
+  MatSnackBarRef,
+  ShowOnDirtyErrorStateMatcher,
+  SimpleSnackBar,
+} from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, map, take, first } from 'rxjs/operators';
+import { filter, first, map, take } from 'rxjs/operators';
 
-import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
-import { AppMetadataTypes } from '../../../store/actions/app-metadata.actions';
-import { SetCFDetails, SetNewAppName } from '../../../store/actions/create-applications-page.actions';
-import { AppState } from '../../../store/app-state';
-import { AppNameUniqueChecking, AppNameUniqueDirective } from '../app-name-unique.directive/app-name-unique.directive';
-import { ApplicationService } from '../application.service';
-
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
+import {
+  GetAppAutoscalerPolicyAction,
+  UpdateAppAutoscalerPolicyAction,
+} from '../../../../../store/src/actions/app-autoscaler.actions';
+import { AppMetadataTypes } from '../../../../../store/src/actions/app-metadata.actions';
+import { SetCFDetails, SetNewAppName } from '../../../../../store/src/actions/create-applications-page.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import { LowerOperators, MetricTypes, UpperOperators } from '../../../../../store/src/helpers/autoscaler-helpers';
+import { appAutoscalerPolicySchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
+import { selectUpdateInfo } from '../../../../../store/src/selectors/api.selectors';
+import { AppAutoscalerPolicy } from '../../../../../store/src/types/app-autoscaler.types';
+import { SourceType } from '../../../../../store/src/types/deploy-application.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import {
-  entityFactory,
-  appAutoscalerPolicySchemaKey,
-} from '../../../store/helpers/entity-factory';
-import { GetAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../../store/actions/app-autoscaler.actions';
-import { AppAutoscalerPolicy } from '../../../store/types/app-autoscaler.types';
-import { selectUpdateInfo } from '../../../store/selectors/api.selectors';
-import { ActionState } from '../../../store/reducers/api-request-reducer/types';
-import { SourceType } from '../../../store/types/deploy-application.types';
-import { MetricTypes, UpperOperators, LowerOperators } from '../../../store/helpers/autoscaler-helpers';
+import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
+import { AppNameUniqueChecking, AppNameUniqueDirective } from '../app-name-unique.directive/app-name-unique.directive';
+import { ApplicationService } from '../application.service';
 
 @Component({
   selector: 'app-edit-autoscaler-policy',

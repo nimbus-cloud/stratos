@@ -1,32 +1,33 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
+import {
+  ErrorStateMatcher,
+  MatSnackBar,
+  MatSnackBarRef,
+  ShowOnDirtyErrorStateMatcher,
+  SimpleSnackBar,
+} from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
-import { SetCFDetails, SetNewAppName } from '../../../store/actions/create-applications-page.actions';
-import { AppState } from '../../../store/app-state';
-import { ApplicationService } from '../application.service';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
-import { EntityService } from '../../../core/entity-service';
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import {
-  entityFactory,
-  appAutoscalerPolicySchemaKey,
-} from '../../../store/helpers/entity-factory';
-import { GetAppAutoscalerPolicyAction } from '../../../store/actions/app-autoscaler.actions';
-import { AppAutoscalerPolicy } from '../../../store/types/app-autoscaler.types';
+
 import {
   GetAppAutoscalerAppMetricAction,
-} from '../../../store/actions/app-autoscaler.actions';
-import {
-  AppAutoscalerAppMetric,
-} from '../../../store/types/app-autoscaler.types';
+  GetAppAutoscalerPolicyAction,
+} from '../../../../../store/src/actions/app-autoscaler.actions';
+import { SetCFDetails, SetNewAppName } from '../../../../../store/src/actions/create-applications-page.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import { normalColor } from '../../../../../store/src/helpers/autoscaler-helpers';
 import {
   appAutoscalerAppMetricSchemaKey,
-} from '../../../store/helpers/entity-factory';
-import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+  appAutoscalerPolicySchemaKey,
+  entityFactory,
+} from '../../../../../store/src/helpers/entity-factory';
+import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { AppAutoscalerAppMetric, AppAutoscalerPolicy } from '../../../../../store/src/types/app-autoscaler.types';
+import { EntityService } from '../../../core/entity-service';
+import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { normalColor } from '../../../store/helpers/autoscaler-helpers';
+import { ApplicationService } from '../application.service';
 
 const monthName = new Intl.DateTimeFormat('en-us', { month: 'short' });
 const weekdayName = new Intl.DateTimeFormat('en-us', { weekday: 'short' });

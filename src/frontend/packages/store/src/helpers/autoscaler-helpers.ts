@@ -1,5 +1,5 @@
-// import * as moment from 'moment';
-import moment from 'moment-timezone';
+import * as moment from 'moment';
+import { tz } from 'moment-timezone';
 
 export const PolicyDefaultSetting = {
   breach_duration_secs_default: 120,
@@ -36,7 +36,7 @@ export const S2NS = 1000000000;
 
 export function autoscalerTransformArrayToMap(newPolicy, timezone) {
   if (timezone === undefined || timezone === '') {
-    timezone = moment.tz.guess();
+    timezone = tz.guess();
   }
   newPolicy.enabled = true;
   newPolicy.scaling_rules_map = {};
@@ -242,8 +242,8 @@ export function buildMetricData(metricName, data, startTime, endTime, skipFormat
 }
 
 export function insertEmptyMetrics(data, startTime, endTime, interval) {
-  const insertEmptyNumber = Math.floor((endTime - startTime) / interval) + 1; 
-  for (let i = 0; i < insertEmptyNumber; i ++) {
+  const insertEmptyNumber = Math.floor((endTime - startTime) / interval) + 1;
+  for (let i = 0; i < insertEmptyNumber; i++) {
     const emptyMetric = buildSingleMetricData(startTime + i * interval, 0);
     if (interval < 0) {
       data.unshift(emptyMetric);

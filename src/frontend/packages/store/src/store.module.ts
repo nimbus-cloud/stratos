@@ -3,12 +3,12 @@ import { NgModule } from '@angular/core';
 import { HttpModule } from '@angular/http';
 import { EffectsModule } from '@ngrx/effects';
 
-import { AutoscalerEffects } from '../../../app/store/effects/autoscaler.effects';
 import { ActionHistoryEffect } from './effects/action-history.effects';
 import { APIEffect } from './effects/api.effects';
 import { AppVariablesEffect } from './effects/app-variables.effects';
 import { AppEffects } from './effects/app.effects';
 import { AuthEffect } from './effects/auth.effects';
+import { AutoscalerEffects } from './effects/autoscaler.effects';
 import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
 import { CreateAppPageEffects } from './effects/create-app-effects';
 import { DeployAppEffects } from './effects/deploy-app.effects';

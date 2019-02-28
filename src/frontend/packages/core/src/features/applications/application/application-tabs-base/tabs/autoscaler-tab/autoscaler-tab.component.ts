@@ -1,48 +1,51 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
+import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { EntityService } from '../../../../../../core/entity-service';
-import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
+import { distinctUntilChanged, filter, first, map } from 'rxjs/operators';
+
 import {
-  entityFactory,
-  appAutoscalerPolicySchemaKey,
-  appAutoscalerScalingHistorySchemaKey,
-  appAutoscalerAppMetricSchemaKey,
-  appAutoscalerInsMetricSchemaKey,
-} from '../../../../../../store/helpers/entity-factory';
-import { ApplicationService } from '../../../../application.service';
-import {
-  GetAppAutoscalerPolicyAction,
-  GetAppAutoscalerScalingHistoryAction,
+  DetachAppAutoscalerPolicyAction,
   GetAppAutoscalerAppMetricAction,
   GetAppAutoscalerInsMetricAction,
+  GetAppAutoscalerPolicyAction,
+  GetAppAutoscalerScalingHistoryAction,
   UpdateAppAutoscalerPolicyAction,
-  DetachAppAutoscalerPolicyAction,
-} from '../../../../../../store/actions/app-autoscaler.actions';
+} from '../../../../../../../../store/src/actions/app-autoscaler.actions';
+import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
+import { AppState } from '../../../../../../../../store/src/app-state';
+import { MetricTypes } from '../../../../../../../../store/src/helpers/autoscaler-helpers';
 import {
+  appAutoscalerAppMetricSchemaKey,
+  appAutoscalerInsMetricSchemaKey,
+  appAutoscalerPolicySchemaKey,
+  appAutoscalerScalingHistorySchemaKey,
+  entityFactory,
+} from '../../../../../../../../store/src/helpers/entity-factory';
+import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';
+import {
+  getPaginationObservables,
+} from '../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { selectUpdateInfo } from '../../../../../../../../store/src/selectors/api.selectors';
+import {
+  AppAutoscalerAppMetric,
+  AppAutoscalerInsMetric,
   AppAutoscalerPolicy,
   AppAutoscalerScalingHistory,
-  AppAutoscalerAppMetric,
-  AppAutoscalerInsMetric
-} from '../../../../../../store/types/app-autoscaler.types';
-import { map, filter, distinctUntilChanged, first } from 'rxjs/operators';
-import { getPaginationObservables } from '../../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../../store/app-state';
-import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
-import { ActionState } from '../../../../../../store/reducers/api-request-reducer/types';
-import { selectUpdateInfo } from '../../../../../../store/selectors/api.selectors';
+} from '../../../../../../../../store/src/types/app-autoscaler.types';
+import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
+import { EntityService } from '../../../../../../core/entity-service';
+import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { ConfirmationDialogConfig } from '../../../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../shared/components/confirmation-dialog.service';
-import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
-import { DatePipe } from '@angular/common';
-import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import {
   CfAppRoutesListConfigService,
 } from '../../../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
+import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
 import { CfOrgSpaceDataService } from '../../../../../../shared/data-services/cf-org-space-service.service';
-import { RouterNav } from '../../../../../../store/actions/router.actions';
-import { MetricTypes } from '../../../../../../store/helpers/autoscaler-helpers';
+import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
+import { ApplicationService } from '../../../../application.service';
 
 @Component({
   selector: 'app-autoscaler-tab',
@@ -205,7 +208,7 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
       this.appAutoscalerAppMetrics = {};
       Object.keys(policyEntity.entity.scaling_rules_map).map((metricName) => {
         this.appAutoscalerAppMetrics[metricName] =
-        this.getAppMetric(metricName, policyEntity.entity.scaling_rules_map[metricName], this.paramsMetrics);
+          this.getAppMetric(metricName, policyEntity.entity.scaling_rules_map[metricName], this.paramsMetrics);
       });
     }
   }
@@ -255,7 +258,7 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
       ).subscribe(actionState => {
         if (actionState.error) {
           this.appAutoscalerPolicySnackBarRef =
-          this.appAutoscalerPolicySnackBar.open(`Failed to detach policy: ${actionState.message}`, 'Dismiss');
+            this.appAutoscalerPolicySnackBar.open(`Failed to detach policy: ${actionState.message}`, 'Dismiss');
         }
       });
     });
@@ -332,7 +335,7 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
       ).subscribe(actionState => {
         if (actionState.error) {
           this.appAutoscalerPolicySnackBarRef =
-          this.appAutoscalerPolicySnackBar.open(`Failed to create policy: ${actionState.message}`, 'Dismiss');
+            this.appAutoscalerPolicySnackBar.open(`Failed to create policy: ${actionState.message}`, 'Dismiss');
         }
       });
       this.detachConfirmOk = 0;
