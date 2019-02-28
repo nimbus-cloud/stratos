@@ -42,6 +42,7 @@ import { ENTITY_SERVICE } from '../../../../shared/entity.tokens';
 import { ApplicationData, ApplicationService } from '../../application.service';
 import { EndpointsService } from './../../../../core/endpoints.service';
 
+
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
   'Stop Application',
@@ -85,6 +86,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     ))
   );
 
+
   isBusyUpdating$: Observable<{ updating: boolean }>;
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Application);
@@ -101,6 +103,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private currentUserPermissionsService: CurrentUserPermissionsService,
     scmService: GitSCMService
   ) {
+
     const endpoints$ = store.select(endpointEntitiesSelector);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
       withLatestFrom(
@@ -166,6 +169,14 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           } else {
             tab.label = scm.getLabel();
           }
+        }
+      });
+
+    this.applicationService.waitForAppAutoscalerHealth$
+      .pipe(first())
+      .subscribe(entity => {
+        if (entity && entity.entity && entity.entity.entity && entity.entity.entity.uptime > 0) {
+          this.tabLinks.push({ link: 'auto-scaler', label: 'Autoscale' });
         }
       });
   }

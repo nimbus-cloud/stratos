@@ -1,18 +1,23 @@
 import { Store } from '@ngrx/store';
-import { APIResource, EntityInfo } from '../../store/src/types/api.types';
-import { ApplicationData, ApplicationService } from '../src/features/applications/application.service';
-import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
-import { AppStat } from '../../store/src/types/app-metadata.types';
-import {
-  EnvVarStratosProject,
-  ApplicationEnvVarsHelper
-} from '../src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { ApplicationStateData, ApplicationStateService } from '../src/shared/components/application-state/application-state.service';
-import { ISpace, IApp, IAppSummary } from '../src/core/cf-api.types';
-import { AppState } from '../../store/src/app-state';
-import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
 import { Observable, of as observableOf } from 'rxjs';
+
+import { AppAutoscalerHealth, AppAutoscalerPolicy } from '../../../app/store/types/app-autoscaler.types';
+import { AppState } from '../../store/src/app-state';
+import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
+import { APIResource, EntityInfo } from '../../store/src/types/api.types';
+import { AppStat } from '../../store/src/types/app-metadata.types';
+import { IApp, IAppSummary, ISpace } from '../src/core/cf-api.types';
+import { EntityServiceFactory } from '../src/core/entity-service-factory.service';
+import { ApplicationData, ApplicationService } from '../src/features/applications/application.service';
+import {
+  ApplicationEnvVarsHelper,
+  EnvVarStratosProject,
+} from '../src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import {
+  ApplicationStateData,
+  ApplicationStateService,
+} from '../src/shared/components/application-state/application-state.service';
+import { PaginationMonitorFactory } from '../src/shared/monitors/pagination-monitor.factory';
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {
@@ -51,6 +56,12 @@ export class ApplicationServiceMock {
   appSummary$: Observable<EntityInfo<APIResource<IAppSummary>>> = observableOf({
     entityRequestInfo: { fetching: false }
   } as EntityInfo<APIResource<IAppSummary>>);
+  appAutoscalerPolicy$: Observable<EntityInfo<AppAutoscalerPolicy>> = observableOf(({
+    entityRequestInfo: { fetching: false }
+  } as EntityInfo<AppAutoscalerPolicy>));
+  appAutoscalerHealth$: Observable<EntityInfo<AppAutoscalerHealth>> = observableOf(({
+    entityRequestInfo: { fetching: false }
+  } as EntityInfo<AppAutoscalerHealth>));
   appStats$: Observable<APIResource<AppStat>[]> = observableOf(new Array<APIResource<AppStat>>());
   applicationStratProject$: Observable<EnvVarStratosProject> =
     observableOf({ deploySource: { type: '', timestamp: 0, commit: '' }, deployOverrides: null });

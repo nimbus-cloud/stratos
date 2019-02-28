@@ -18,6 +18,11 @@ import {
 } from '../../../core/src/core/cf-api.types';
 import { IRequestEntityTypeState, IRequestTypeState } from '../app-state';
 import {
+  appAutoscalerAppMetricSchemaKey,
+  appAutoscalerHealthSchemaKey,
+  appAutoscalerInsMetricSchemaKey,
+  appAutoscalerPolicySchemaKey,
+  appAutoscalerScalingHistorySchemaKey,
   appEnvVarsSchemaKey,
   appEventSchemaKey,
   applicationSchemaKey,
@@ -136,5 +141,10 @@ export const defaultCfEntitiesState = {
   [metricSchemaKey]: {},
   [servicePlanVisibilitySchemaKey]: {},
   [serviceBrokerSchemaKey]: {},
-  [userFavoritesSchemaKey]: {}
+  [userFavoritesSchemaKey]: {},
+  [appAutoscalerHealthSchemaKey]: {},
+  [appAutoscalerPolicySchemaKey]: {},
+  [appAutoscalerScalingHistorySchemaKey]: {},
+  [appAutoscalerAppMetricSchemaKey]: {},
+  [appAutoscalerInsMetricSchemaKey]: {},
 };

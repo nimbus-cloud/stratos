@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { HttpModule } from '@angular/http';
 import { EffectsModule } from '@ngrx/effects';
 
+import { AutoscalerEffects } from '../../../app/store/effects/autoscaler.effects';
 import { ActionHistoryEffect } from './effects/action-history.effects';
 import { APIEffect } from './effects/api.effects';
 import { AppVariablesEffect } from './effects/app-variables.effects';
@@ -65,7 +66,8 @@ import { AppStoreExtensionsModule } from './store.extensions.module';
       RecursiveDeleteEffect,
       AppEffects,
       RouteEffect,
-      UserFavoritesEffect
+      UserFavoritesEffect,
+      AutoscalerEffects,
     ])
   ]
 })
