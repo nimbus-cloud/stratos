@@ -115,18 +115,18 @@ function setLowerColor(array) {
 
 export function autoscalerTransformMapToArray(newPolicy) {
   if (newPolicy.scaling_rules_form) {
-    const scaling_rules = [];
+    const scalingRules = [];
     newPolicy.scaling_rules_form.map((trigger) => {
       deleteIf(trigger, 'breach_duration_secs', trigger.breach_duration_secs === PolicyDefaultSetting.breach_duration_secs_default);
       deleteIf(trigger, 'cool_down_secs', trigger.cool_down_secs === PolicyDefaultSetting.cool_down_secs_default);
-      scaling_rules.push(trigger);
+      scalingRules.push(trigger);
     });
-    if (scaling_rules.length > 0) {
-      newPolicy.scaling_rules = scaling_rules;
+    if (scalingRules.length > 0) {
+      newPolicy.scaling_rules = scalingRules;
     }
   }
-  delete newPolicy['scaling_rules_form'];
-  delete newPolicy['scaling_rules_map'];
+  delete newPolicy.scaling_rules_form;
+  delete newPolicy.scaling_rules_map;
   if (newPolicy.schedules) {
     deleteIf(
       newPolicy.schedules,
@@ -193,7 +193,7 @@ function deleteIf(fatherEntity, childName, condition) {
   }
 }
 
-function initMeticData(metricName) {
+function initMetricData(metricName) {
   return {
     latest: {
       target: [{
@@ -213,11 +213,11 @@ function initMeticData(metricName) {
     },
     unit: '',
     chartMaxValue: 0,
-  }
+  };
 }
 
 export function buildMetricData(metricName, data, startTime, endTime, skipFormat, trigger) {
-  const result = initMeticData(metricName);
+  const result = initMetricData(metricName);
   if (data.resources.length > 0) {
     const basicInfo = getMetricBasicInfo(metricName, data.resources, trigger);
     result.unit = basicInfo.unit;
@@ -228,7 +228,7 @@ export function buildMetricData(metricName, data, startTime, endTime, skipFormat
       const target = transformMetricData(data.resources, basicInfo.interval, startTime, endTime, trigger);
       const colorTarget = buildMetricColorData(target, trigger);
       result.formated = {
-        target: target,
+        target,
         colorTarget
       };
     }
@@ -248,7 +248,7 @@ export function insertEmptyMetrics(data, startTime, endTime, interval) {
     if (interval < 0) {
       data.unshift(emptyMetric);
     } else {
-      data.push(emptyMetric)
+      data.push(emptyMetric);
     }
   }
   return data;
@@ -259,7 +259,7 @@ function buildSingleMetricData(timestamp, value) {
     time: timestamp,
     name: moment(timestamp * 1000).format(MomentFormateTimeS),
     value
-  }
+  };
 }
 
 function transformMetricData(source, interval, startTime, endTime, trigger) {
@@ -269,7 +269,7 @@ function transformMetricData(source, interval, startTime, endTime, trigger) {
   const scope = Math.round(interval / 2);
   const target = [];
   let targetTimestamp = Math.round(source[0].timestamp / S2NS);
-  let targetIndex = insertEmptyMetrics(target, targetTimestamp - interval, startTime, -interval).length
+  let targetIndex = insertEmptyMetrics(target, targetTimestamp - interval, startTime, -interval).length;
   let sourceIndex = 0;
   while (sourceIndex < source.length) {
     if (!target[targetIndex]) {
@@ -283,7 +283,7 @@ function transformMetricData(source, interval, startTime, endTime, trigger) {
       targetIndex++;
       targetTimestamp += interval;
     } else {
-      target[targetIndex]['value'] = parseInt(metric.value, 10);
+      target[targetIndex].value = parseInt(metric.value, 10);
       sourceIndex++;
     }
   }
@@ -331,12 +331,13 @@ function getColor(trigger, value) {
 
 function getMetricBasicInfo(metricName, source, trigger) {
   const map = {};
-  let interval = metricMap[metricName]['interval'];
-  let maxCount, preTimestamp = 0;
+  let interval = metricMap[metricName].interval;
+  let maxCount;
+  let preTimestamp = 0;
   let maxValue = -1;
-  for (let i = 0; i < source.length; i++) {
-    maxValue = parseInt(source[i].value, 10) > maxValue ? parseInt(source[i].value, 10) : maxValue;
-    const thisTimestamp = Math.round(parseInt(source[i].timestamp, 10) / S2NS);
+  for (const sourceVal of source) {
+    maxValue = parseInt(sourceVal.value, 10) > maxValue ? parseInt(sourceVal.value, 10) : maxValue;
+    const thisTimestamp = Math.round(parseInt(sourceVal.timestamp, 10) / S2NS);
     const currentInterval = thisTimestamp - preTimestamp;
     if (map[currentInterval] === undefined) {
       map[currentInterval] = 1;
@@ -350,14 +351,16 @@ function getMetricBasicInfo(metricName, source, trigger) {
     preTimestamp = thisTimestamp;
   }
   return {
-    interval: interval,
+    interval,
     unit: source[0].unit,
     chartMaxValue: getChartMax(trigger, maxValue)
   };
 }
 
 function getChartMax(trigger, maxValue) {
-  let thresholdCount, maxThreshold, thresholdmax = 0;
+  let thresholdCount;
+  let maxThreshold;
+  let thresholdmax = 0;
   if (trigger.upper && trigger.upper.length > 0) {
     thresholdCount += trigger.upper.length;
     maxThreshold = trigger.upper[0].threshold;

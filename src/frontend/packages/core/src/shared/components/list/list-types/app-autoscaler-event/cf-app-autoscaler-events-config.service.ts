@@ -110,7 +110,7 @@ export class CfAppAutoscalerEventsConfigService extends ListConfig<EntityInfo> i
       filter((pag) => !!pag),
       first(),
     ).subscribe(pag => {
-      const currentFilter = pag.clientPagination.filter.items['queryRange'];
+      const currentFilter = pag.clientPagination.filter.items.queryRange;
       if (!currentFilter) {
         this.store.dispatch(new SetClientFilter(action.entityKey, action.paginationKey, {
           string: '',

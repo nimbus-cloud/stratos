@@ -34,25 +34,23 @@ export class CfAppAutoscalerEventsDataSource extends ListDataSource<EntityInfo> 
 
   constructor(
     store: Store<AppState>,
-    _cfGuid: string,
-    _appGuid: string,
+    cfGuid: string,
+    appGuid: string,
   ) {
-    const paginationKey = `app-autoscaler-events:${_cfGuid}${_appGuid}`;
-    const aaction = new GetAppAutoscalerScalingHistoryAction(paginationKey, _appGuid, _cfGuid);
+    const paginationKey = `app-autoscaler-events:${cfGuid}${appGuid}`;
+    const action = new GetAppAutoscalerScalingHistoryAction(paginationKey, appGuid, cfGuid);
 
     super(
       {
         store,
-        action: aaction,
+        action,
         schema: entityFactory(appAutoscalerScalingHistorySchemaKey),
-        getRowUniqueId: (object: EntityInfo) => {
-          return object.entity.metadata ? object.entity.metadata.guid : null;
-        },
+        getRowUniqueId: (object: EntityInfo) => object.entity.metadata ? object.entity.metadata.guid : null,
         paginationKey,
       }
     );
 
-    this.action = aaction;
+    this.action = action;
   }
 
 }

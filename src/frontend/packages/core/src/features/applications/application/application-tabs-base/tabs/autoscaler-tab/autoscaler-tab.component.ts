@@ -109,16 +109,16 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
   paramsMetrics = {
     'start-time': 0,
     'end-time': (new Date()).getTime().toString() + '000000',
-    'page': '1',
+    page: '1',
     'results-per-page': '1',
-    'order': 'desc'
+    order: 'desc'
   };
   paramsHistory = {
     'start-time': 0,
     'end-time': (new Date()).getTime().toString() + '000000',
-    'page': '1',
+    page: '1',
     'results-per-page': '5',
-    'order': 'desc'
+    order: 'desc'
   };
 
   ngOnDestroy(): void {
@@ -280,51 +280,51 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
       this.attachConfirmOk = 2;
       this.isEditing = false;
       this.currentPolicy = {
-        'instance_min_count': 1,
-        'instance_max_count': 10,
-        'scaling_rules': [
+        instance_min_count: 1,
+        instance_max_count: 10,
+        scaling_rules: [
           {
-            'metric_type': 'memoryused',
-            'stat_window_secs': 300,
-            'breach_duration_secs': 600,
-            'threshold': 10,
-            'operator': '<=',
-            'cool_down_secs': 300,
-            'adjustment': '-2'
+            metric_type: 'memoryused',
+            stat_window_secs: 300,
+            breach_duration_secs: 600,
+            threshold: 10,
+            operator: '<=',
+            cool_down_secs: 300,
+            adjustment: '-2'
           },
           {
-            'metric_type': 'responsetime',
-            'stat_window_secs': 300,
-            'breach_duration_secs': 600,
-            'threshold': 40,
-            'operator': '<',
-            'cool_down_secs': 300,
-            'adjustment': '-5'
+            metric_type: 'responsetime',
+            stat_window_secs: 300,
+            breach_duration_secs: 600,
+            threshold: 40,
+            operator: '<',
+            cool_down_secs: 300,
+            adjustment: '-5'
           }
         ],
-        'schedules': {
-          'timezone': 'Asia/Shanghai',
-          'recurring_schedule': [
+        schedules: {
+          timezone: 'Asia/Shanghai',
+          recurring_schedule: [
             {
-              'start_time': '10:00',
-              'end_time': '18:00',
-              'days_of_week': [
+              start_time: '10:00',
+              end_time: '18:00',
+              days_of_week: [
                 1,
                 2,
                 3
               ],
-              'instance_min_count': 1,
-              'instance_max_count': 10,
-              'initial_min_instance_count': 5
+              instance_min_count: 1,
+              instance_max_count: 10,
+              initial_min_instance_count: 5
             }
           ],
-          'specific_date': [
+          specific_date: [
             {
-              'start_date_time': '2099-06-02T10:00',
-              'end_date_time': '2099-06-15T13:59',
-              'instance_min_count': 1,
-              'instance_max_count': 4,
-              'initial_min_instance_count': 2
+              start_date_time: '2099-06-02T10:00',
+              end_date_time: '2099-06-15T13:59',
+              instance_min_count: 1,
+              instance_max_count: 4,
+              initial_min_instance_count: 2
             }
           ]
         }

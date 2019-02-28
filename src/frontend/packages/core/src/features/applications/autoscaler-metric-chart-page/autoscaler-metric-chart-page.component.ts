@@ -55,9 +55,9 @@ export class AutoscalerMetricChartPageComponent implements OnInit, OnDestroy {
   paramsMetrics = {
     'start-time': this.current - 30 * 60 * 1000 + '000000',
     'end-time': this.current + '000000',
-    'page': '1',
+    page: '1',
     'results-per-page': '10000000',
-    'order': 'asc'
+    order: 'asc'
   };
 
   appAutoscalerAppMetrics = {};
@@ -192,8 +192,7 @@ export class AutoscalerMetricChartPageComponent implements OnInit, OnDestroy {
   }
 
   buildSingleLegend(legendValue, legendColor, ul) {
-    for (let i = 0; i < ul.length; i++) {
-      const current = ul[i];
+    for (const current of ul) {
       const name = `${current.adjustment} if ${current.metric_type} ${current.operator} ${current.threshold}`;
       legendValue.push({
         name,

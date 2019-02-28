@@ -246,7 +246,7 @@ export class AutoscalerEffects {
               this.transformEventData(action.entityKey, mappedData, action.appGuid, histories);
             }
             return [
-              new WrapperRequestActionSuccess(mappedData, apiAction, actionType, histories['total_results'], histories['total_pages'])
+              new WrapperRequestActionSuccess(mappedData, apiAction, actionType, histories.total_results, histories.total_pages)
             ];
           }),
           catchError(err => [
