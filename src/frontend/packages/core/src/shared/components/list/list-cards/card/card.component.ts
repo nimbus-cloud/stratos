@@ -28,6 +28,15 @@ import {
   AppServiceBindingCardComponent
 } from '../../list-types/app-sevice-bindings/app-service-binding-card/app-service-binding-card.component';
 import { ServiceInstanceCardComponent } from '../../list-types/services-wall/service-instance-card/service-instance-card.component';
+import {
+  AppAutoscalerMetricChartCardComponent
+} from '../../list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/app-autoscaler-metric-chart-card.component';
+import {
+  AppAutoscalerComboChartComponent
+} from '../../list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/combo-chart/combo-chart.component';
+import {
+  AppAutoscalerComboSeriesVerticalComponent
+} from '../../list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/combo-chart/combo-series-vertical.component';
 
 export const listCards = [
   CardAppComponent,
@@ -39,7 +48,10 @@ export const listCards = [
   CfStacksCardComponent,
   CfServiceCardComponent,
   AppServiceBindingCardComponent,
-  ServiceInstanceCardComponent
+  ServiceInstanceCardComponent,
+  AppAutoscalerMetricChartCardComponent,
+  AppAutoscalerComboChartComponent,
+  AppAutoscalerComboSeriesVerticalComponent
 ];
 @Component({
   selector: 'app-card',
