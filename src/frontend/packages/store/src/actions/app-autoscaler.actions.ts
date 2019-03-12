@@ -1,15 +1,15 @@
-import { PaginatedAction } from '../types/pagination.types';
-import { CFStartAction } from '../types/request.types';
+import { RequestOptions } from '@angular/http';
+
 import {
+  appAutoscalerAppMetricSchemaKey,
   appAutoscalerHealthSchemaKey,
+  appAutoscalerInsMetricSchemaKey,
   appAutoscalerPolicySchemaKey,
   appAutoscalerScalingHistorySchemaKey,
-  appAutoscalerAppMetricSchemaKey,
-  appAutoscalerInsMetricSchemaKey,
-  entityFactory
+  entityFactory,
 } from '../helpers/entity-factory';
-import { IRequestAction } from '../types/request.types';
-import { RequestOptions } from '@angular/http';
+import { PaginatedAction } from '../types/pagination.types';
+import { CFStartAction, IRequestAction } from '../types/request.types';
 
 export const AppAutoscalerPolicyEvents = {
   GET_APP_AUTOSCALER_POLICY: '[App Autoscaler] Get autoscaler policy',
@@ -82,6 +82,31 @@ export class DetachAppAutoscalerPolicyAction implements IRequestAction {
   entityKey = appAutoscalerPolicySchemaKey;
 }
 
+export class GetAppAutoscalerPolicyTriggerAction extends CFStartAction implements PaginatedAction {
+  constructor(
+    public paginationKey: string,
+    public appGuid: string,
+    public cfGuid: string,
+    public normalFormat?,
+  ) {
+    super();
+    this.query = {
+      metric: 'policy'
+    };
+  }
+  actions = [
+    AppAutoscalerPolicyEvents.GET_APP_AUTOSCALER_POLICY,
+    AppAutoscalerPolicyEvents.GET_APP_AUTOSCALER_POLICY_SUCCESS,
+    AppAutoscalerPolicyEvents.GET_APP_AUTOSCALER_POLICY_FAILED
+  ];
+  type = APP_AUTOSCALER_POLICY;
+  entity = [entityFactory(appAutoscalerPolicySchemaKey)];
+  entityKey = appAutoscalerPolicySchemaKey;
+  options: RequestOptions;
+  query: any;
+  windowValue: string;
+}
+
 export class GetAppAutoscalerScalingHistoryAction extends CFStartAction implements PaginatedAction {
   private static sortField = 'timestamp';
   constructor(
@@ -92,6 +117,9 @@ export class GetAppAutoscalerScalingHistoryAction extends CFStartAction implemen
     public params?,
   ) {
     super();
+    this.query = {
+      metric: 'history'
+    };
   }
   actions = [
     AppAutoscalerScalingHistoryEvents.GET_APP_AUTOSCALER_SCALING_HISTORY,
@@ -108,6 +136,8 @@ export class GetAppAutoscalerScalingHistoryAction extends CFStartAction implemen
     'start-time': 0,
     'end-time': (new Date()).getTime().toString() + '000000',
   };
+  query: any;
+  windowValue: string;
 }
 
 export abstract class GetAppAutoscalerMetricAction implements PaginatedAction {

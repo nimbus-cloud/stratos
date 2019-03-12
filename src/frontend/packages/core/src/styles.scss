@@ -83,3 +83,25 @@ button.mat-simple-snackbar-action {
     }
   }
 }
+
+.autoscaler-chart-bar-legend {
+  .ngx-charts {
+    display: none;
+  }
+  // header {
+  //   display: none;
+  // }
+  // li {
+  //   display: inline-block;
+  // }
+  .legend-wrap {
+    width: unset;
+    .legend-labels {
+      width: unset;
+    }
+  }
+}
+
+.autoscaler-metric-page .cards__columns-3 app-card {
+  width: 100%;
+}

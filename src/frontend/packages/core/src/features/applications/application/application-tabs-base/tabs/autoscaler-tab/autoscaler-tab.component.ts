@@ -159,7 +159,8 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
       appAutoscalerScalingHistorySchemaKey,
       entityFactory(appAutoscalerScalingHistorySchemaKey),
       this.applicationService.appGuid,
-      new GetAppAutoscalerScalingHistoryAction('', this.applicationService.appGuid, this.applicationService.cfGuid, this.paramsHistory),
+      new GetAppAutoscalerScalingHistoryAction('', this.applicationService.appGuid,
+        this.applicationService.cfGuid, true, this.paramsHistory),
       false
     );
     this.appAutoscalerPolicy$ = this.appAutoscalerPolicyService.entityObs$.pipe(
@@ -382,11 +383,8 @@ export class AutoscalerTabComponent implements OnInit, OnDestroy {
         'applications',
         this.applicationService.cfGuid,
         this.applicationService.appGuid,
-        'app-autoscaler-metric-chart-page'
-      ],
-      query: {
-        // spaceGuid: app.app.entity.space_guid
-      }
+        'app-autoscaler-metric-page'
+      ]
     }));
   }
 

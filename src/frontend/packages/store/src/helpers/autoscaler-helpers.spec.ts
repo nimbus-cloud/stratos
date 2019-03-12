@@ -1,13 +1,13 @@
 import {
   autoscalerTransformArrayToMap,
   autoscalerTransformMapToArray,
-  insertEmptyMetrics,
   isEqual,
   isPolicyMapEqual,
+  insertEmptyMetrics
 } from './autoscaler-helpers';
 
 describe('Autoscaler Helper', () => {
-  it('insertEmptyMetrics', () => {
+  it('insertEmptyMetrics', function () {
     const descTarget = [20, 40, 60, 80, 100];
     const descSource1 = insertEmptyMetrics([], 100, 10, -20);
     descSource1.map((item, index) => {
@@ -27,8 +27,6 @@ describe('Autoscaler Helper', () => {
       expect(isEqual(item.time, ascTarget[index])).toBe(true);
     });
   });
-
-
 
   it('Test policy transformation', () => {
     const arrayPolicy = {

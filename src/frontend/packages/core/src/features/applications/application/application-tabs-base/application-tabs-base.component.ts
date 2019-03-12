@@ -2,7 +2,7 @@ import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { delay, filter, first, map, mergeMap, startWith, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { delay, filter, first, map, mergeMap, startWith, tap, withLatestFrom } from 'rxjs/operators';
 
 import {
   AppMetadataTypes,
@@ -121,23 +121,32 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }),
       first()
     );
-
-    const appDoesNotHaveEnvVars$ = this.applicationService.appSpace$.pipe(
-      switchMap(space => this.currentUserPermissionsService.can(CurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
-        this.applicationService.cfGuid, space.metadata.guid)
-      ),
-      map(can => !can)
-    );
-
-    this.tabLinks = [
-      { link: 'summary', label: 'Summary' },
-      { link: 'instances', label: 'Instances' },
-      { link: 'routes', label: 'Routes' },
-      { link: 'log-stream', label: 'Log Stream' },
-      { link: 'services', label: 'Services' },
-      { link: 'variables', label: 'Variables', hidden: appDoesNotHaveEnvVars$ },
-      { link: 'events', label: 'Events' }
-    ];
+    this.applicationService.applicationStratProject$
+      .pipe(first())
+      .subscribe(stratProject => {
+        if (
+          stratProject &&
+          stratProject.deploySource &&
+          stratProject.deploySource.type === 'github'
+        ) {
+          this.tabLinks.push({ link: 'github', label: 'GitHub' });
+        }
+      });
+    this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
+      if (hasMetrics) {
+        this.tabLinks.push({
+          link: 'metrics',
+          label: 'Metrics'
+        });
+      }
+    });
+    this.applicationService.waitForAppAutoscalerHealth$
+      .pipe(first())
+      .subscribe(entity => {
+        if (entity && entity.entity && entity.entity.entity && entity.entity.entity.uptime > 0) {
+          this.tabLinks.push({ link: 'auto-scaler', label: 'Autoscale' });
+        }
+      });
 
     this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
       if (hasMetrics) {
