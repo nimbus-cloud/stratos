@@ -115,14 +115,14 @@ function setLowerColor(array) {
 
 export function autoscalerTransformMapToArray(newPolicy) {
   if (newPolicy.scaling_rules_form) {
-    const scaling_rules = [];
+    const scalingRules = [];
     newPolicy.scaling_rules_form.map((trigger) => {
       deleteIf(trigger, 'breach_duration_secs', trigger.breach_duration_secs === PolicyDefaultSetting.breach_duration_secs_default);
       deleteIf(trigger, 'cool_down_secs', trigger.cool_down_secs === PolicyDefaultSetting.cool_down_secs_default);
-      scaling_rules.push(trigger);
+      scalingRules.push(trigger);
     });
-    if (scaling_rules.length > 0) {
-      newPolicy.scaling_rules = scaling_rules;
+    if (scalingRules.length > 0) {
+      newPolicy.scaling_rules = scalingRules;
     }
   }
   delete newPolicy.scaling_rules_form;
@@ -508,7 +508,9 @@ function getMetricBasicInfo(metricName, source, trigger) {
 }
 
 function getChartMax(trigger, maxValue) {
-  let thresholdCount = 0, maxThreshold = 0, thresholdmax = 0;
+  let thresholdCount = 0;
+  let maxThreshold = 0;
+  let thresholdmax = 0;
   if (trigger.upper && trigger.upper.length > 0) {
     thresholdCount += trigger.upper.length;
     maxThreshold = trigger.upper[0].threshold;

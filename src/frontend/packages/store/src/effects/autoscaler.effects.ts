@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
 
@@ -57,149 +57,150 @@ export class AutoscalerEffects {
   ) { }
 
   @Effect()
-  fetchAppAutoscalerHealth$ = this.actions$
-    .ofType<GetAppAutoscalerHealthAction>(APP_AUTOSCALER_HEALTH).pipe(
-      mergeMap(action => {
-        const actionType = 'fetch';
-        const apiAction = {
-          entityKey: action.entityKey,
-          type: action.type,
-          guid: action.appGuid
-        } as ICFAction;
-        this.store.dispatch(new StartRequestAction(apiAction, actionType));
-        const options = new RequestOptions();
-        options.url = `${healthPrefix}/health`;
-        options.method = 'get';
-        options.headers = this.addHeaders(action.cfGuid);
-        return this.http
-          .request(new Request(options)).pipe(
-            mergeMap(response => {
-              const healthInfo = response.json();
-              const mappedData = {
-                entities: { [action.entityKey]: {} },
-                result: []
-              } as NormalizedResponse;
-              this.transformData(action.entityKey, mappedData, action.appGuid, healthInfo);
-              return [
-                new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
-              ];
-            }),
-            catchError(err => [
-              new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch health info', err), apiAction, actionType)
-            ]));
-      }));
+  fetchAppAutoscalerHealth$ = this.actions$.pipe(
+    ofType<GetAppAutoscalerHealthAction>(APP_AUTOSCALER_HEALTH),
+    mergeMap(action => {
+      const actionType = 'fetch';
+      const apiAction = {
+        entityKey: action.entityKey,
+        type: action.type,
+        guid: action.appGuid
+      } as ICFAction;
+      this.store.dispatch(new StartRequestAction(apiAction, actionType));
+      const options = new RequestOptions();
+      options.url = `${healthPrefix}/health`;
+      options.method = 'get';
+      options.headers = this.addHeaders(action.cfGuid);
+      return this.http
+        .request(new Request(options)).pipe(
+          mergeMap(response => {
+            const healthInfo = response.json();
+            const mappedData = {
+              entities: { [action.entityKey]: {} },
+              result: []
+            } as NormalizedResponse;
+            this.transformData(action.entityKey, mappedData, action.appGuid, healthInfo);
+            return [
+              new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+            ];
+          }),
+          catchError(err => [
+            new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch health info', err), apiAction, actionType)
+          ]));
+    }));
 
   @Effect()
-  updateAppAutoscalerPolicy$ = this.actions$
-    .ofType<UpdateAppAutoscalerPolicyAction>(UPDATE_APP_AUTOSCALER_POLICY).pipe(
-      mergeMap(action => {
-        const actionType = 'update';
-        const apiAction = {
-          entityKey: action.entityKey,
-          type: action.type,
-          guid: action.appGuid
-        } as ICFAction;
-        this.store.dispatch(new StartRequestAction(apiAction, actionType));
-        const options = new RequestOptions();
-        options.url = `${commonPrefix}/apps/${action.appGuid}/policy`;
-        options.method = 'put';
-        options.headers = this.addHeaders(action.cfGuid);
-        options.body = autoscalerTransformMapToArray(action.policy);
-        return this.http
-          .request(new Request(options)).pipe(
-            mergeMap(response => {
-              const policyInfo = autoscalerTransformArrayToMap(response.json(), undefined);
-              const mappedData = {
-                entities: { [action.entityKey]: {} },
-                result: []
-              } as NormalizedResponse;
-              this.transformData(action.entityKey, mappedData, action.appGuid, policyInfo);
-              return [
-                new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
-              ];
-            }),
-            catchError(err => [
-              new WrapperRequestActionFailed(createAutoscalerRequestMessage('update policy', err), apiAction, actionType)
-            ]));
-      }));
+  updateAppAutoscalerPolicy$ = this.actions$.pipe(
+    ofType<UpdateAppAutoscalerPolicyAction>(UPDATE_APP_AUTOSCALER_POLICY),
+    mergeMap(action => {
+      const actionType = 'update';
+      const apiAction = {
+        entityKey: action.entityKey,
+        type: action.type,
+        guid: action.appGuid
+      } as ICFAction;
+      this.store.dispatch(new StartRequestAction(apiAction, actionType));
+      const options = new RequestOptions();
+      options.url = `${commonPrefix}/apps/${action.appGuid}/policy`;
+      options.method = 'put';
+      options.headers = this.addHeaders(action.cfGuid);
+      options.body = autoscalerTransformMapToArray(action.policy);
+      return this.http
+        .request(new Request(options)).pipe(
+          mergeMap(response => {
+            const policyInfo = autoscalerTransformArrayToMap(response.json(), undefined);
+            const mappedData = {
+              entities: { [action.entityKey]: {} },
+              result: []
+            } as NormalizedResponse;
+            this.transformData(action.entityKey, mappedData, action.appGuid, policyInfo);
+            return [
+              new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+            ];
+          }),
+          catchError(err => [
+            new WrapperRequestActionFailed(createAutoscalerRequestMessage('update policy', err), apiAction, actionType)
+          ]));
+    }));
 
   @Effect()
-  getAppAutoscalerPolicy$ = this.actions$
-    .ofType<GetAppAutoscalerPolicyAction>(APP_AUTOSCALER_POLICY).pipe(
-      mergeMap(action => {
-        const actionType = 'fetch';
-        const apiAction = {
-          entityKey: action.entityKey,
-          type: action.type,
-          guid: action.appGuid
-        } as ICFAction;
-        this.store.dispatch(new StartRequestAction(apiAction, actionType));
-        const options = new RequestOptions();
-        options.url = `${commonPrefix}/apps/${action.appGuid}/policy`;
-        options.method = 'get';
-        options.headers = this.addHeaders(action.cfGuid);
-        return this.http
-          .request(new Request(options)).pipe(
-            mergeMap(response => {
-              const policyInfo = autoscalerTransformArrayToMap(response.json());
-              const mappedData = {
-                entities: { [action.entityKey]: {} },
-                result: []
-              } as NormalizedResponse;
-              this.transformData(action.entityKey, mappedData, action.appGuid, policyInfo);
+  getAppAutoscalerPolicy$ = this.actions$.pipe(
+    ofType<GetAppAutoscalerPolicyAction>(APP_AUTOSCALER_POLICY),
+    mergeMap(action => {
+      const actionType = 'fetch';
+      const apiAction = {
+        entityKey: action.entityKey,
+        type: action.type,
+        guid: action.appGuid
+      } as ICFAction;
+      this.store.dispatch(new StartRequestAction(apiAction, actionType));
+      const options = new RequestOptions();
+      options.url = `${commonPrefix}/apps/${action.appGuid}/policy`;
+      options.method = 'get';
+      options.headers = this.addHeaders(action.cfGuid);
+      return this.http
+        .request(new Request(options)).pipe(
+          mergeMap(response => {
+            const policyInfo = autoscalerTransformArrayToMap(response.json());
+            const mappedData = {
+              entities: { [action.entityKey]: {} },
+              result: []
+            } as NormalizedResponse;
+            this.transformData(action.entityKey, mappedData, action.appGuid, policyInfo);
+            return [
+              new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+            ];
+          }),
+          catchError(err => {
+            if (err.status === 404 && err._body === '{}') {
               return [
-                new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+                new WrapperRequestActionFailed('No policy is defined for this application.', apiAction, actionType)
               ];
-            }),
-            catchError(err => {
-              if (err.status === 404 && err._body === '{}') {
-                return [
-                  new WrapperRequestActionFailed('No policy is defined for this application.', apiAction, actionType)
-                ];
-              } else {
-                return [
-                  new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch policy', err), apiAction, actionType)
-                ];
-              }
-            }));
-      }));
+            } else {
+              return [
+                new WrapperRequestActionFailed(createAutoscalerRequestMessage('fetch policy', err), apiAction, actionType)
+              ];
+            }
+          }));
+    }));
 
 
   @Effect()
-  detachAppAutoscalerPolicy$ = this.actions$
-    .ofType<DetachAppAutoscalerPolicyAction>(DETACH_APP_AUTOSCALER_POLICY).pipe(
-      mergeMap(action => {
-        const actionType = 'update';
-        const apiAction = {
-          entityKey: action.entityKey,
-          type: action.type,
-          guid: action.appGuid
-        } as ICFAction;
-        this.store.dispatch(new StartRequestAction(apiAction, actionType));
-        const options = new RequestOptions();
-        options.url = `${commonPrefix}/apps/${action.appGuid}/policy`;
-        options.method = 'delete';
-        options.headers = this.addHeaders(action.cfGuid);
-        return this.http
-          .request(new Request(options)).pipe(
-            mergeMap(response => {
-              const mappedData = {
-                entities: { [action.entityKey]: {} },
-                result: []
-              } as NormalizedResponse;
-              this.transformData(action.entityKey, mappedData, action.appGuid, { enabled: false });
-              return [
-                new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
-              ];
-            }),
-            catchError(err => [
-              new WrapperRequestActionFailed(createAutoscalerRequestMessage('update policy', err), apiAction, actionType)
-            ]));
-      }));
+  detachAppAutoscalerPolicy$ = this.actions$.pipe(
+    ofType<DetachAppAutoscalerPolicyAction>(DETACH_APP_AUTOSCALER_POLICY),
+    mergeMap(action => {
+      const actionType = 'update';
+      const apiAction = {
+        entityKey: action.entityKey,
+        type: action.type,
+        guid: action.appGuid
+      } as ICFAction;
+      this.store.dispatch(new StartRequestAction(apiAction, actionType));
+      const options = new RequestOptions();
+      options.url = `${commonPrefix}/apps/${action.appGuid}/policy`;
+      options.method = 'delete';
+      options.headers = this.addHeaders(action.cfGuid);
+      return this.http
+        .request(new Request(options)).pipe(
+          mergeMap(response => {
+            const mappedData = {
+              entities: { [action.entityKey]: {} },
+              result: []
+            } as NormalizedResponse;
+            this.transformData(action.entityKey, mappedData, action.appGuid, { enabled: false });
+            return [
+              new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+            ];
+          }),
+          catchError(err => [
+            new WrapperRequestActionFailed(createAutoscalerRequestMessage('update policy', err), apiAction, actionType)
+          ]));
+    }));
 
   @Effect()
   fetchAppAutoscalerPolicyTrigger$ = this.actions$
-    .ofType<GetAppAutoscalerPolicyTriggerAction>(APP_AUTOSCALER_POLICY).pipe(
+    .pipe(
+      ofType<GetAppAutoscalerPolicyTriggerAction>(APP_AUTOSCALER_POLICY),
       withLatestFrom(this.store),
       mergeMap(([action, state]) => {
         const actionType = 'fetch';
@@ -229,7 +230,8 @@ export class AutoscalerEffects {
 
   @Effect()
   fetchAppAutoscalerScalingHistory$ = this.actions$
-    .ofType<GetAppAutoscalerScalingHistoryAction>(APP_AUTOSCALER_SCALING_HISTORY).pipe(
+    .pipe(
+      ofType<GetAppAutoscalerScalingHistoryAction>(APP_AUTOSCALER_SCALING_HISTORY),
       withLatestFrom(this.store),
       mergeMap(([action, state]) => {
         const actionType = 'fetch';
@@ -291,7 +293,8 @@ export class AutoscalerEffects {
 
   @Effect()
   fetchAppAutoscalerAppMetric$ = this.actions$
-    .ofType<GetAppAutoscalerMetricAction>(FETCH_APP_AUTOSCALER_METRIC).pipe(
+    .pipe(
+      ofType<GetAppAutoscalerMetricAction>(FETCH_APP_AUTOSCALER_METRIC),
       mergeMap(action => {
         const actionType = 'fetch';
         const apiAction = {

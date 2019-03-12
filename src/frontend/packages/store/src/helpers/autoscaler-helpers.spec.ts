@@ -7,7 +7,7 @@ import {
 } from './autoscaler-helpers';
 
 describe('Autoscaler Helper', () => {
-  it('insertEmptyMetrics', function () {
+  it('insertEmptyMetrics', () => {
     const descTarget = [20, 40, 60, 80, 100];
     const descSource1 = insertEmptyMetrics([], 100, 10, -20);
     descSource1.map((item, index) => {

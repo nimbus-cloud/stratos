@@ -1,27 +1,30 @@
-import { AppAutoscalerMetricChartCardComponent } from './app-autoscaler-metric-chart-card/app-autoscaler-metric-chart-card.component';
-import { AppAutoscalerMetricChartDataSource } from './app-autoscaler-metric-chart-data-source';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { ApplicationService } from '../../../../../features/applications/application.service';
+
+import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
-import { EntityInfo } from '../../../../../../../store/src/types/api.types';
-import { IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ITimeRange, MetricQueryType } from '../../../../../shared/services/metrics-range-selector.types';
 import { ITableColumn } from '../../list-table/table.types';
+import { IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
+import {
+  AppAutoscalerMetricChartCardComponent,
+} from './app-autoscaler-metric-chart-card/app-autoscaler-metric-chart-card.component';
+import { AppAutoscalerMetricChartDataSource } from './app-autoscaler-metric-chart-data-source';
 
 @Injectable()
-export class AppAutoscalerMetricChartListConfigService extends ListConfig<EntityInfo> implements IListConfig<EntityInfo> {
+export class AppAutoscalerMetricChartListConfigService extends ListConfig<APIResource> implements IListConfig<APIResource> {
   autoscalerMetricSource: AppAutoscalerMetricChartDataSource;
   cardComponent = AppAutoscalerMetricChartCardComponent;
   viewType = ListViewTypes.CARD_ONLY;
   defaultView = 'cards' as ListView;
-  columns: Array<ITableColumn<EntityInfo>> = [
+  columns: Array<ITableColumn<APIResource>> = [
     {
       columnId: 'name',
       headerCell: () => 'Metric type',
       cellDefinition: {
-        getValue: (row) => row['metadata']['guid']
+        getValue: (row) => row.metadata.guid
       },
       cellFlex: '2'
     }

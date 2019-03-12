@@ -1,13 +1,14 @@
 import { Store } from '@ngrx/store';
+
+import { GetAppAutoscalerPolicyTriggerAction } from '../../../../../../../store/src/actions/app-autoscaler.actions';
 import { AddParams, RemoveParams } from '../../../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
-import { EntityInfo } from '../../../../../../../store/src/types/api.types';
+import { appAutoscalerPolicySchemaKey, entityFactory } from '../../../../../../../store/src/helpers/entity-factory';
+import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState, QParam } from '../../../../../../../store/src/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { entityFactory, appAutoscalerPolicySchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
-import { GetAppAutoscalerPolicyTriggerAction } from '../../../../../../../store/src/actions/app-autoscaler.actions';
 
-export class AppAutoscalerMetricChartDataSource extends ListDataSource<EntityInfo> {
+export class AppAutoscalerMetricChartDataSource extends ListDataSource<APIResource> {
   action: any;
 
   public getFilterFromParams(pag: PaginationEntityState) {
@@ -33,11 +34,11 @@ export class AppAutoscalerMetricChartDataSource extends ListDataSource<EntityInf
 
   constructor(
     store: Store<AppState>,
-    _cfGuid: string,
-    _appGuid: string,
+    cfGuid: string,
+    appGuid: string,
   ) {
-    const paginationKey = `app-autoscaler-policy-triggers:${_cfGuid}${_appGuid}`;
-    const action = new GetAppAutoscalerPolicyTriggerAction(paginationKey, _appGuid, _cfGuid);
+    const paginationKey = `app-autoscaler-policy-triggers:${cfGuid}${appGuid}`;
+    const action = new GetAppAutoscalerPolicyTriggerAction(paginationKey, appGuid, cfGuid);
     super(
       {
         store,
