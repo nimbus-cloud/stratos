@@ -18,7 +18,9 @@ import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-
 import {
   canUpdateOrgSpaceRoles,
   createCfOrgSpaceSteppersUrl,
+  createCfOrgSpaceUserRemovalUrl,
   waitForCFPermissions,
+  hasRoleWithin,
 } from '../../../../../features/cloud-foundry/cf.helpers';
 import { CfUserService } from './../../../../data-services/cf-user.service';
 import { ITableColumn } from './../../list-table/table.types';
@@ -109,10 +111,62 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     description: `Manage roles`,
   };
 
+  removeUserActions(): IListAction<APIResource<CfUser>>[] {
+    const activeRouteCfOrgSpace = this.cfUserService.activeRouteCfOrgSpace;
+    const orgGuid = activeRouteCfOrgSpace.orgGuid;
+    const spaceGuid = activeRouteCfOrgSpace.spaceGuid;
+    const action = (withSpaces?: boolean) => {
+      return (user: APIResource<CfUser>) => {
+        const queryParams = { queryParams: { user: user.entity.guid, spaces: withSpaces } };
+
+        this.store.dispatch(new UsersRolesSetUsers(activeRouteCfOrgSpace.cfGuid, [user.entity]));
+        this.router.navigate([this.createRemoveUserUrl()], queryParams);
+      };
+    };
+    const createVisible = (userRow$: Observable<APIResource<CfUser>>) => combineLatest(
+      userRow$,
+      this.createCanUpdateOrgSpaceRoles()
+    ).pipe(
+      map(([user, canUpdateRoles]) => {
+        const isCfContext = !orgGuid && !spaceGuid;
+        const hasRoleWithinOrgsSpaces = hasRoleWithin(user.entity, orgGuid, spaceGuid) ||
+          (isCfContext && defaultUserHasRoles(user.entity));
+
+        return canUpdateRoles && hasRoleWithinOrgsSpaces;
+      })
+    );
+
+    const fromSpaces: IListAction<APIResource<CfUser>> = {
+      action: action(true),
+      label: (() => (spaceGuid) ? 'Remove from space' : 'Remove from spaces')(),
+      createVisible
+    };
+
+    const fromOrgsSpaces: IListAction<APIResource<CfUser>> = {
+      action: action(),
+      label: (() => (orgGuid) ? 'Remove from org and spaces' : 'Remove from orgs and spaces')(),
+      createVisible
+    };
+
+    if (spaceGuid) {
+      return [fromSpaces];
+    }
+
+    return [fromOrgsSpaces, fromSpaces];
+  }
+
   protected createManagerUsersUrl(): string {
     return createCfOrgSpaceSteppersUrl(
       this.cfUserService.activeRouteCfOrgSpace.cfGuid,
       `/users/manage`,
+      this.activeRouteCfOrgSpace.orgGuid,
+      this.activeRouteCfOrgSpace.spaceGuid
+    );
+  }
+
+  protected createRemoveUserUrl(): string {
+    return createCfOrgSpaceUserRemovalUrl(
+      this.cfUserService.activeRouteCfOrgSpace.cfGuid,
       this.activeRouteCfOrgSpace.orgGuid,
       this.activeRouteCfOrgSpace.spaceGuid
     );
@@ -264,7 +318,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
   getColumns = () => this.columns;
   getGlobalActions = () => [];
   getMultiActions = () => [this.manageMultiUserAction];
-  getSingleActions = () => [this.manageUserAction];
+  getSingleActions = () => [this.manageUserAction, ...this.removeUserActions()];
   getMultiFiltersConfigs = () => this.multiFilterConfigs;
   getDataSource = () => this.dataSource;
   getInitialised = () => this.initialised;

@@ -160,6 +160,16 @@ export function isSpaceDeveloper(user: CfUser, spaceGuid: string): boolean {
   return hasRole(user, spaceGuid, CfUserRoleParams.SPACES);
 }
 
+export function hasRoleWithin(user: CfUser, orgGuid?: string, spaceGuid?: string): boolean {
+  return isOrgManager(user, orgGuid) ||
+    isOrgBillingManager(user, orgGuid) ||
+    isOrgAuditor(user, orgGuid) ||
+    isOrgUser(user, orgGuid) ||
+    isSpaceManager(user, spaceGuid) ||
+    isSpaceAuditor(user, spaceGuid) ||
+    isSpaceDeveloper(user, spaceGuid);
+}
+
 function hasRole(user: CfUser, guid: string, roleType: string) {
   if (user[roleType]) {
     const roles = user[roleType] as APIResource[];
@@ -188,7 +198,7 @@ export function getActiveRouteCfOrgSpace(activatedRoute: ActivatedRoute) {
   return ({
     cfGuid: getIdFromRoute(activatedRoute, 'endpointId'),
     orgGuid: getIdFromRoute(activatedRoute, 'orgId'),
-    spaceGuid: getIdFromRoute(activatedRoute, 'spaceId')
+    spaceGuid: getIdFromRoute(activatedRoute, 'spaceId'),
   });
 }
 
@@ -348,6 +358,23 @@ export function createCfOrgSpaceSteppersUrl(
     }
   }
   route += stepperPath;
+  return route;
+}
+
+export function createCfOrgSpaceUserRemovalUrl(
+  cfGuid: string,
+  orgGuid?: string,
+  spaceGuid?: string,
+): string {
+  let route = `/cloud-foundry/${cfGuid}`;
+  if (orgGuid) {
+    route += `/organizations/${orgGuid}`;
+    if (spaceGuid) {
+      route += `/spaces/${spaceGuid}`;
+    }
+  }
+  route += '/users/remove';
+
   return route;
 }
 
