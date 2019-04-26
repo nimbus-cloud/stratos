@@ -1,10 +1,8 @@
 applications:
   - name: console
-    docker:
-      image: splatform/stratos:stable
-    instances: 1
-    memory: 128M
-    disk_quota: 384M
+    instances: 2
+    memory: 2G
+    disk_quota: 1G
     # services:
     #   - console_db
     # env:
